@@ -37,3 +37,13 @@
 // };
 
 // export default ReportDetails;
+
+import React from 'react'
+
+const ReportDetails = () => {
+  return (
+    <div>Hello world</div>
+  )
+}
+
+export default ReportDetails
