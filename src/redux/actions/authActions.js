@@ -7,7 +7,7 @@ import axios from 'axios';
 
 export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
   try {
-    const response = await axios.post(`http://localhost:5001/api/auth/login`, credentials);
+    const response = await axios.post(`${baseURL}/api/auth/login`, credentials);
     localStorage.setItem('token', response.data.token); 
     
     
