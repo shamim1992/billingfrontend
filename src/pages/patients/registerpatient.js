@@ -47,7 +47,7 @@ const InputField = React.memo(({ label, name, type = 'text', icon: Icon, require
         {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
 ));
-
+InputField.displayName = 'InputField';
 
 const getCurrentDateTime = () => {
     const now = new Date();
