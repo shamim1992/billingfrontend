@@ -157,7 +157,7 @@ const UserList = () => {
             <User size={32} className="text-gray-400" />
           </div>
           <h3 className="text-md font-medium text-gray-900">No users found</h3>
-          <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filter to find what you're looking for.</p>
+          <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filter to find what you&apos;re looking for.</p>
         </div>
       )}
     </Layout>

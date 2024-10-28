@@ -32,7 +32,7 @@ const Layout = ({ children }) => {
                 {user ? `Welcome Back, ${user.name}!` : 'Welcome Back!'}
               </h1>
               <p className="text-gray-500 mt-1 text-sm">
-                Here's what's happening with your practice today.
+                Here&apos;s what&apos;s happening with your practice today.
               </p>
             </div>
             {/* Main Content */}
