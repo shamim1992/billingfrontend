@@ -115,7 +115,7 @@ const PatientDetails = () => {
   return (
     <Layout>
       <div className="max-w-4xl  bg-white  rounded-lg">
-        <h1 className="text-sm font-bold mb-6 text-gray-800">{patient.firstName} {patient.lastName}'s Details</h1>
+        <h1 className="text-sm font-bold mb-6 text-gray-800">{patient.firstName} {patient.lastName} &apos;s Details</h1>
 
         {/* Patient Information Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
