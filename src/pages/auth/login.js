@@ -10,7 +10,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { loading, error, user } = useSelector((state) => state.auth); // Get user from auth state
-
+console.log(user)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(login({ email, password }));
@@ -42,7 +42,7 @@ const Login = () => {
           <div className="mb-4">
             <label>Email</label>
             <input
-              type="email"
+              type="text"
               className="w-full p-2 border border-gray-300 rounded"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

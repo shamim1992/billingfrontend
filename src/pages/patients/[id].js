@@ -176,7 +176,7 @@ const PatientDetails = () => {
             data={appointments || []}
             pagination
             highlightOnHover
-            className="bg-white w-full"
+            className="bg-white w-full mx-auto"
           />
         </div>
 

@@ -12,6 +12,7 @@ const AddUser = () => {
 
   const [formData, setFormData] = useState({
     name: '',
+    username:'',
     email: '',
     contactNumber: '', // Fixed from 'contact'
     role: '',
@@ -28,6 +29,7 @@ const AddUser = () => {
     if (success) {
       setFormData({
         name: '',
+        username:'',
         email: '',
         contactNumber: '',
         role: '',
@@ -92,7 +94,7 @@ const AddUser = () => {
           {error && <p className="text-red-500 mb-4">{error}</p>}
 
           <div className="mb-4">
-            <label className="block text-gray-700">Name</label>
+            <label className="block text-gray-700">Name<span className='text-red-500'>*</span></label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -108,7 +110,23 @@ const AddUser = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
+            <label className="block text-gray-700">Username<span className='text-red-500'>*</span></label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter full username"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700">Email<span className='text-red-500'>*</span></label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -124,7 +142,7 @@ const AddUser = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Password</label>
+            <label className="block text-gray-700">Password<span className='text-red-500'>*</span></label>
             <div className="relative">
               <EyeClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -140,7 +158,7 @@ const AddUser = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Contact</label>
+            <label className="block text-gray-700">Contact<span className='text-red-500'>*</span></label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -156,7 +174,7 @@ const AddUser = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Role</label>
+            <label className="block text-gray-700">Role<span className='text-red-500'>*</span></label>
             <select
               name="role"
               value={formData.role}
@@ -176,7 +194,7 @@ const AddUser = () => {
           {formData.role === 'Doctor' && (
             <>
               <div className="mb-4">
-                <label className="block text-gray-700">Department</label>
+                <label className="block text-gray-700">Department<span className='text-red-500'>*</span></label>
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                   <select
@@ -186,7 +204,7 @@ const AddUser = () => {
                     className="w-full px-4 pl-10 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
-                    <option value="">Select Department</option>
+                    <option value="">Select Department<span className='text-red-500'>*</span></option>
                     {departments.map((dept) => (
                       <option key={dept._id} value={dept._id}>
                         {dept.name}
@@ -197,7 +215,7 @@ const AddUser = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700">Specialization</label>
+                <label className="block text-gray-700">Specialization<span className='text-red-500'>*</span></label>
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                   <input
@@ -213,7 +231,7 @@ const AddUser = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700">Consultation Charges</label>
+                <label className="block text-gray-700">Consultation Charges<span className='text-red-500'>*</span></label>
                 <div className="relative">
                   <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" size={20} />
                   <input

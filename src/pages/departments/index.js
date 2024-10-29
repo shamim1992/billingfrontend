@@ -17,7 +17,7 @@ const DepartmentList = () => {
 
   // Filter departments based on search term
   const filteredDepartments = departments?.filter(department =>
-    department.name.toLowerCase().includes(searchTerm.toLowerCase())
+    department?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const DepartmentCard = ({ department }) => (

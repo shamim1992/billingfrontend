@@ -1,8 +1,11 @@
 import React from 'react'
+import Login from './auth/login'
 
 const index = () => {
   return (
-    <div className='text-center'>index</div>
+    <div>
+      <Login/>
+    </div>
   )
 }
 

@@ -45,8 +45,8 @@ const Navbar = ({ toggleSidebar }) => {
             <span className="text-white font-medium">JD</span>
           </div> */}
           <div>
-            <div className="font-sm text-gray-900">{user?.name}</div>
-            <div className="text-xs text-gray-500">{user?.email}</div>
+            <div className="font-sm text-gray-900">{user? user.name  : ''}</div>
+            <div className="text-xs text-gray-500">{user? user.email  : ''}</div>
           </div>
         </div>
       </div>

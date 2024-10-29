@@ -383,7 +383,7 @@ const ReportPage = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 ">
         <h1 className="text-sm font-bold mb-6">Hospital Report</h1>
 
         {/* Patient Summary */}
