@@ -31,8 +31,9 @@ export const createPatient = createAsyncThunk('patients/create', async (newPatie
   };
 
   try {
+   
     const response = await axios.post(`${baseURL}/api/patients`, newPatient, config);
- console.log(response)
+
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.message);

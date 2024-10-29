@@ -81,8 +81,9 @@ const PatientForm = () => {
         membershipType: '',
         nationality: 'India',
         patientSource: '',
-        researchPatient: false,
-        diagnosis:'',
+        researchPatient: '',
+        diagnosis: '',
+        registeredPatient: false,
         registrationDate: getCurrentDateTime()
     });
 
@@ -184,59 +185,20 @@ const PatientForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+       
         if (validateForm()) {
             try {
+               console.log(formData)
                 await dispatch(createPatient(formData));
                 toast('Patient created successfully!');
-                router.push('/patients');
+                // router.push('/patients');
             } catch (error) {
                 console.error('Error creating patient:', error);
                 setErrors(prev => ({ ...prev, submit: 'Failed to create patient. Please try again.' }));
-                
+
             }
         }
     };
-
-    // const InputField = ({ label, name, type = 'text', icon: Icon, required = false, options = null, placeholder = '', value = formData[name], error = errors[name] }) => (
-    //     <div className="form-group">
-    //         <label className="block text-sm font-medium text-gray-700 mb-1">
-    //             {label} {required && <span className="text-red-500">*</span>}
-    //         </label>
-    //         <div className="relative">
-    //             {Icon && (
-    //                 <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-    //                     <Icon className="h-5 w-5 text-gray-400" />
-    //                 </div>
-    //             )}
-    //             {options ? (
-    //                 <select
-    //                     name={name}
-    //                     value={value}
-    //                     onChange={handleChange}
-    //                     className={`${Icon ? 'pl-10' : 'pl-3'} w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} p-2.5`}
-    //                     required={required}
-    //                 >
-    //                     {options.map(option => (
-    //                         <option key={option.value} value={option.value}>
-    //                             {option.label}
-    //                         </option>
-    //                     ))}
-    //                 </select>
-    //             ) : (
-    //                 <input
-    //                     type={type}
-    //                     name={name}
-    //                     value={value}
-    //                     onChange={handleChange}
-    //                     className={`${Icon ? 'pl-10' : 'pl-3'} w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} p-2.5`}
-    //                     placeholder={placeholder}
-    //                     required={required}
-    //                 />
-    //             )}
-    //             {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-    //         </div>
-    //     </div>
-    // );
 
     return (
         <Layout>
@@ -358,6 +320,19 @@ const PatientForm = () => {
                                     icon={Users}
                                     options={membershipOptions}
                                 />
+
+                                <div className="form-group">
+                                    <label className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.registeredPatient}
+                                            name="registeredPatient"
+                                            onChange={handleChange}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Un-Registered Patient</span>
+                                    </label>
+                                </div>
                             </div>
 
                             {/* Right Column */}
@@ -454,16 +429,17 @@ const PatientForm = () => {
 
                                 {/* Research Patient Checkbox */}
                                 <div className="form-group">
-                                    <label className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            name="researchPatient"
-                                            checked={formData.researchPatient}
-                                            onChange={handleChange}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">Research Patient</span>
-                                    </label>
+                                    {/* <span className="text-sm font-medium text-gray-700"></span> */}
+                                    <InputField
+                                    label="Research Patient"
+                                        type="text"
+                                        name="researchPatient"
+                                        icon={FileText}
+                                        onChange={handleChange}
+                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+
+
                                 </div>
                             </div>
                         </div>

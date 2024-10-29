@@ -6,7 +6,7 @@ import Layout from '../../components/Layout';
 import { Search, UserPlus, Eye, Edit, Delete, toast } from 'lucide-react';
 
 
-const PatientList = () => {
+const UnPatientList = () => {
   const dispatch = useDispatch();
   const { patients } = useSelector((state) => state.patients);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,9 +33,10 @@ const PatientList = () => {
     setRefresh((prev) => !prev); // Toggle refresh to re-fetch patients
   };
 
-  const filteredPatients = patients?.filter((patient) => {
-    const matchesSearch = patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || patient.patientId.includes(searchTerm) || patient.mobileNumber.includes(searchTerm);
-    const startsWithThree = patient.patientId.startsWith('3');
+  const filteredPatients = patients?.filter((patient) => 
+    {
+    const matchesSearch = patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || patient.patientId.includes(searchTerm)|| patient.mobileNumber.includes(searchTerm) ;
+    const startsWithThree = patient.patientId.startsWith('UN');
     if (selectedFilter === 'all') return matchesSearch && startsWithThree;
     return matchesSearch;
   });
@@ -55,14 +56,13 @@ const PatientList = () => {
                 <span className="text-sm">Add Patient</span>
               </span>
             </Link>
-            <Link href="/patients/unregistered">
+            <Link href="/patients">
               <span className="inline-flex items-center gap-2 px-4 py-2   rounded-lg transition-colors">
                 <UserPlus size={20} />
-                <span className="text-sm">Unregistered</span>
+                <span className="text-sm">Registered</span>
               </span>
             </Link>
           </div>
-
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -122,7 +122,7 @@ const PatientList = () => {
                     <Link href={`/patients/${patient._id}`}>
                       <Eye size={16} />
                     </Link>
-
+                    
                     {/* <button onClick={() => handleDelete(patient._id)} className="text-red-500">
                       <Delete size={16} />
                     </button> */}
@@ -144,4 +144,4 @@ const PatientList = () => {
   );
 };
 
-export default PatientList;
+export default UnPatientList;
