@@ -1,4 +1,3 @@
-// pages/auth/login.js
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/actions/authActions';
@@ -9,27 +8,29 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const router = useRouter();
-  const { loading, error, user } = useSelector((state) => state.auth); // Get user from auth state
-console.log(user)
+  const { loading, error, user } = useSelector((state) => state.auth);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(login({ email, password }));
-    if (result.meta.requestStatus === 'fulfilled') {
-      // Check the user's role and redirect accordingly
-      if (user?.role === 'superAdmin') {
+
+    if (result.meta.requestStatus === 'fulfilled' && user) {
+      // Check if user and user.role are defined before routing
+      if (user.role === 'superAdmin') {
         router.push('/dashboard/superAdmin');
-      } else if (user?.role === 'Admin') {
+      } else if (user.role === 'Admin') {
         router.push('/dashboard/admin');
-      } else if (user?.role === 'Doctor') {
+      } else if (user.role === 'Doctor') {
         router.push('/dashboard/doctor');
-      } else if (user?.role === 'Receptionist') {
+      } else if (user.role === 'Receptionist') {
         router.push('/dashboard/receptionist');
-      } else if (user?.role === 'Accountant') {
+      } else if (user.role === 'Accountant') {
         router.push('/dashboard/accountant');
       } else {
-        // Default fallback in case role is not recognized
-        // router.push('/dashboard');
+        router.push('/');
       }
+    } else {
+      console.error('User or role not defined');
     }
   };
 

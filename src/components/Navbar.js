@@ -12,6 +12,7 @@ const Navbar = ({ toggleSidebar }) => {
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
   const router = useRouter();
+
   // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,7 +26,6 @@ const Navbar = ({ toggleSidebar }) => {
   }, []);
 
   const handleLogout = () => {
-    // Add your logout logic here
     dispatch(logout()); // Dispatch the logout action
     router.push('/auth/login'); // Redirect to the login page
   };
@@ -38,20 +38,15 @@ const Navbar = ({ toggleSidebar }) => {
         ${isProfileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
       `}
     >
-      {/* User Info Section */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
-          {/* <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="text-white font-medium">JD</span>
-          </div> */}
           <div>
-            <div className="font-sm text-gray-900">{user? user.name  : ''}</div>
-            <div className="text-xs text-gray-500">{user? user.email  : ''}</div>
+            <div className="font-sm text-gray-900">{user ? user.name : ''}</div>
+            <div className="text-xs text-gray-500">{user ? user.email : ''}</div>
           </div>
         </div>
       </div>
 
-      {/* Menu Items */}
       <div className="p-2 text-sm">
         <Link href="/profile">
           <span className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 cursor-pointer">
@@ -81,7 +76,6 @@ const Navbar = ({ toggleSidebar }) => {
   return (
     <nav className="sticky top-0 z-30 bg-white border-b">
       <div className="px-4 h-16 flex items-center justify-between">
-        {/* Left section */}
         <div className="flex items-center gap-6">
           <button onClick={toggleSidebar} className="lg:hidden p-2 hover:bg-gray-100 rounded-md">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +95,6 @@ const Navbar = ({ toggleSidebar }) => {
           </div>
         </div>
 
-        {/* Right section */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
             <button className="p-2 hover:bg-gray-100 rounded-lg relative">
@@ -109,15 +102,12 @@ const Navbar = ({ toggleSidebar }) => {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </button>
             <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-              {/* <MessageSquare size={20} className="text-gray-600" /> */}
               <input type="checkbox" value="dark" className="toggle theme-controller" />
-              {/* <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" /> */}
             </button>
           </div>
 
           <div className="h-8 w-px bg-gray-200" />
 
-          {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button 
               className={`
@@ -127,11 +117,13 @@ const Navbar = ({ toggleSidebar }) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
               <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                <span className="text-white font-medium text-sm">JD</span>
+                <span className="text-white font-medium text-sm">
+                  {user ? user.name.charAt(0).toUpperCase() : 'U'}
+                </span>
               </div>
               <div className="hidden md:block text-left">
-                <div className="text-sm font-medium">{user.name}</div>
-                <div className="text-xs text-gray-500 capitalize">{user.role}</div>
+                <div className="text-sm font-medium">{user ? user.name : 'Guest'}</div>
+                <div className="text-xs text-gray-500 capitalize">{user ? user.role : ''}</div>
               </div>
               <ChevronDown 
                 size={16} 
