@@ -45,29 +45,27 @@ const PatientList = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-md font-semibold text-gray-900">Patients</h1>
-            <p className="text-gray-500 mt-1 text-sm">Manage your patient records and information</p>
+            <h1 className="text-md font-semibold ">Patients</h1>
+            <p className=" mt-1 text-sm">Manage your patient records and information</p>
           </div>
           <div>
             <Link href="/patients/registerpatient">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors">
-                <UserPlus size={20} />
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl hover:shadow-md border transition-colors">
+                <UserPlus size={20} className=''/>
                 <span className="text-sm">Add Patient</span>
               </span>
             </Link>
             <Link href="/patients/unregistered">
-              <span className="inline-flex items-center gap-2 px-4 py-2   rounded-lg transition-colors">
-                <UserPlus size={20} />
+              <span className="inline-flex items-center gap-2 px-4 py-2  rounded-2xl hover:shadow-md border transition-colors">
+                <UserPlus size={20} className=''/>
                 <span className="text-sm">Unregistered</span>
               </span>
             </Link>
           </div>
-
         </div>
-
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 " size={20} />
             <input
               type="text"
               placeholder="Search patients(Name, ID, Mobile)"
@@ -80,7 +78,7 @@ const PatientList = () => {
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-4 text-sm py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-4 text-sm py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
             >
               <option value="all">All Patients</option>
               <option value="recent">Recent</option>
@@ -92,31 +90,31 @@ const PatientList = () => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+        <table className="min-w-full   rounded-lg">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Patient ID</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Name</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Age</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Gender</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Mobile</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">City</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Last Visit</th>
-              <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Actions</th>
+            <tr className="">
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Patient ID</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Name</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Age</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Gender</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Mobile</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">City</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Last Visit</th>
+              <th className="px-6 py-3 border-b text-left text-sm font-semibold ">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredPatients?.map((patient) => (
-              <tr key={patient._id} className="hover:bg-gray-100">
-                <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.patientId}</td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700">
+              <tr key={patient._id} className="">
+                <td className="px-6 py-4 border-b text-sm ">{patient.patientId}</td>
+                <td className="px-6 py-4 border-b text-sm ">
                   {patient.firstName} {patient.lastName}
                 </td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700">{calculateAge(patient.dob)}</td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700 capitalize">{patient.gender}</td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.mobileNumber}</td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.city}</td>
-                <td className="px-6 py-4 border-b text-sm text-gray-700">15 May 2024</td>
+                <td className="px-6 py-4 border-b text-sm ">{calculateAge(patient.dob)}</td>
+                <td className="px-6 py-4 border-b text-sm  capitalize">{patient.gender}</td>
+                <td className="px-6 py-4 border-b text-sm ">{patient.mobileNumber}</td>
+                <td className="px-6 py-4 border-b text-sm ">{patient.city}</td>
+                <td className="px-6 py-4 border-b text-sm ">15 May 2024</td>
                 <td className="px-6 py-4 border-b text-sm text-blue-600 hover:text-blue-700">
                   <div className="flex gap-2 justify-center items-center">
                     <Link href={`/patients/${patient._id}`}>

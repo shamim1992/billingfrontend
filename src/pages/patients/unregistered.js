@@ -51,14 +51,14 @@ const UnPatientList = () => {
           </div>
           <div>
             <Link href="/patients/registerpatient">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors">
-                <UserPlus size={20} />
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl hover:shadow-md border transition-colors">
+                <UserPlus size={20} className='' />
                 <span className="text-sm">Add Patient</span>
               </span>
             </Link>
             <Link href="/patients">
-              <span className="inline-flex items-center gap-2 px-4 py-2   rounded-lg transition-colors">
-                <UserPlus size={20} />
+              <span className="inline-flex items-center gap-2 px-4 py-2  rounded-2xl hover:shadow-md border transition-colors">
+                <UserPlus size={20} className=''/>
                 <span className="text-sm">Registered</span>
               </span>
             </Link>

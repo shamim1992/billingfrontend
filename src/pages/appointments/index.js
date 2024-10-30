@@ -30,7 +30,7 @@ const AppointmentList = () => {
             <p className="text-gray-500 mt-1 text-sm">Manage your appointments and schedules</p>
           </div>
           <Link href="/appointments/new">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <span className="inline-flex items-center gap-2 px-4 rounded-2xl hover:shadow-md py-2 border transition-colors">
               <Plus size={20} />
               <span className="text-sm">Add Appointment</span>
             </span>

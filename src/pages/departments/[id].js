@@ -30,11 +30,11 @@ const DepartmentDetails = () => {
             <p className="text-gray-500 mt-1 text-sm">Details for {department?.name}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="inline-flex items-center gap-2 px-4 rounded-2xl hover:shadow-md py-2 border transition-colors">
               <Edit size={20} />
               <span>Edit</span>
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <button className="inline-flex items-center gap-2 px-4 rounded-2xl hover:shadow-md py-2 border transition-colors">
               <Trash size={20} />
               <span>Delete</span>
             </button>

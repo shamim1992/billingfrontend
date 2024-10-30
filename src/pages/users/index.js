@@ -40,7 +40,7 @@ const UserList = () => {
               <User size={24} className="text-blue-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">{user.name}</h3>
+              <h3 className="font-semibold ">{user.name}</h3>
               <div className="text-sm text-gray-500">{user.role}</div>
             </div>
           </div>
@@ -86,11 +86,11 @@ const UserList = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-md font-semibold text-gray-900">Users</h1>
-            <p className="text-gray-500 mt-1 text-sm">Manage user roles and details</p>
+            <h1 className="text-md font-semibold ">Users</h1>
+            <p className="mt-1 text-sm">Manage user roles and details</p>
           </div>
           <Link href="/users/new">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <span className="inline-flex items-center gap-2 px-4 rounded-2xl hover:shadow-md py-2 border transition-colors">
               <UserPlus size={20} />
               <span className='text-sm'>Add User</span>
             </span>
@@ -100,7 +100,7 @@ const UserList = () => {
         {/* Filters and Search */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 " size={20} />
             <input
               type="text"
               placeholder="Search users..."
@@ -138,7 +138,7 @@ const UserList = () => {
             <div className={`text-${stat.color}-600 text-md text-center font-semibold`}>
               {stat.value}
             </div>
-            <div className="text-gray-500 text-sm text-center">{stat.label}</div>
+            <div className="text-sm text-center">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -153,11 +153,11 @@ const UserList = () => {
       {/* Empty State */}
       {filteredUsers?.length === 0 && (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <User size={32} className="text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4  rounded-full flex items-center justify-center">
+            <User size={32} className="" />
           </div>
-          <h3 className="text-md font-medium text-gray-900">No users found</h3>
-          <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filter to find what you&apos;re looking for.</p>
+          <h3 className="text-md font-medium ">No users found</h3>
+          <p className="text-sm mt-1">Try adjusting your search or filter to find what you&apos;re looking for.</p>
         </div>
       )}
     </Layout>

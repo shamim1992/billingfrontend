@@ -89,7 +89,7 @@ const AddUser = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg">
+        <form onSubmit={handleSubmit} className="bg-white p-6 max-w-xl mx-auto rounded-lg">
           {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
           {error && <p className="text-red-500 mb-4">{error}</p>}
 

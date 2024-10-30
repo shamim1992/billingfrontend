@@ -312,12 +312,6 @@ const ReportPage = () => {
     });
   };
 
-  // const renderChangeIndicator = (change) => (
-  //   <div className={`flex items-center ${change >= 0 ? 'text-success' : 'text-error'}`}>
-  //     {change >= 0 ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-  //     {Math.abs(change.toFixed(2))}%
-  //   </div>
-  // );
 
   const patientChartData = {
     labels: ['Total Patients', 'Male Patients', 'Female Patients'],

@@ -25,13 +25,13 @@ const Sidebar = ({ isOpen }) => {
   return (
     <aside className={`
       fixed inset-y-0 left-0 z-50
-      w-64 bg-white border-r
+      w-64 border-r
       transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       transition-transform duration-200 ease-in-out
       flex flex-col h-screen
     `}>
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b sticky top-0 bg-white">
+      <div className="h-16 flex items-center px-6 border-b sticky top-0 ">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center">
             <span className="text-white font-bold">C</span>
@@ -70,7 +70,7 @@ const Sidebar = ({ isOpen }) => {
       </div>
 
       {/* Bottom Menu - Sticky Footer */}
-      <div className="p-4 border-t sticky bottom-0 bg-white">
+      <div className="p-4 border-t sticky bottom-0 ">
         <div className="space-y-1">
           {bottomMenuItems.map((item) => {
             const Icon = item.icon;

@@ -33,7 +33,7 @@ const Navbar = ({ toggleSidebar }) => {
   const ProfileDropdown = () => (
     <div 
       className={`
-        absolute right-0 top-full mt-2 w-64 rounded-lg bg-white shadow-lg border
+        absolute right-0 top-full mt-2 w-64 rounded-lg  shadow-lg border
         transform transition-all duration-200 ease-in-out
         ${isProfileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
       `}
@@ -74,7 +74,7 @@ const Navbar = ({ toggleSidebar }) => {
   );
 
   return (
-    <nav className="sticky top-0 z-30 bg-white border-b">
+    <nav className="sticky top-0 z-30  border-b">
       <div className="px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <button onClick={toggleSidebar} className="lg:hidden p-2 hover:bg-gray-100 rounded-md">
@@ -84,14 +84,14 @@ const Navbar = ({ toggleSidebar }) => {
           </button>
           
           <div className="hidden md:flex items-center gap-3 w-96">
-            <div className="relative flex-1">
+            {/* <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
                 placeholder="Search anything..."
                 className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
+            </div> */}
           </div>
         </div>
 
