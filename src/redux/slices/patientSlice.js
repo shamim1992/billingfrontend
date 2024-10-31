@@ -1,10 +1,11 @@
 // redux/slices/patientSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchPatients, createPatient, fetchPatientById, deletePatientbyId } from '../actions/patientActions';
+import { fetchPatients, createPatient, fetchPatientById, deletePatientbyId, searchPatients } from '../actions/patientActions';
 
 const initialState = {
   patients: [],
   patient: null,
+  searchResults: [],
   loading: false,
   error: null,
 };
@@ -72,6 +73,19 @@ const patientSlice = createSlice({
       .addCase(deletePatientbyId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to delete patient';
+      })
+
+      .addCase(searchPatients.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchPatients.fulfilled, (state, action) => {
+        state.loading = false;
+        state.searchResults = action.payload;
+      })
+      .addCase(searchPatients.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to search patients';
       });
   },
 });

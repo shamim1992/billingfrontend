@@ -32,7 +32,7 @@ const Navbar = ({ toggleSidebar }) => {
 
   const ProfileDropdown = () => (
     <div 
-      className={`
+      className={`bg-white
         absolute right-0 top-full mt-2 w-64 rounded-lg  shadow-lg border
         transform transition-all duration-200 ease-in-out
         ${isProfileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
@@ -74,7 +74,7 @@ const Navbar = ({ toggleSidebar }) => {
   );
 
   return (
-    <nav className="sticky top-0 z-30  border-b">
+    <nav className="sticky top-0 z-30 bg-white border-b">
       <div className="px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <button onClick={toggleSidebar} className="lg:hidden p-2 hover:bg-gray-100 rounded-md">

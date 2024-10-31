@@ -1,65 +1,64 @@
 // redux/slices/billingSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchBills, fetchBillById, updateBillStatus } from '../actions/billingActions';
-
-const initialState = {
-  bills: [],
-  bill: null,
-  loading: false,
-  error: null,
-};
+import { createBilling, fetchBillings, fetchBillingById } from '../actions/billingActions';
 
 const billingSlice = createSlice({
   name: 'billing',
-  initialState,
-  reducers: {},
+  initialState: {
+    billings: [],
+    billing: null,
+    loading: false,
+    error: null
+  },
+  reducers: {
+    resetBillingState: (state) => {
+      state.billing = null;
+      state.error = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
-      // Fetch all bills
-      .addCase(fetchBills.pending, (state) => {
+      // Handle createBilling
+      .addCase(createBilling.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBills.fulfilled, (state, action) => {
+      .addCase(createBilling.fulfilled, (state, action) => {
         state.loading = false;
-        state.bills = action.payload;
+        state.billings.push(action.payload.billing);
       })
-      .addCase(fetchBills.rejected, (state, action) => {
+      .addCase(createBilling.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch bill by ID
-      .addCase(fetchBillById.pending, (state) => {
+      // Handle fetchBillings
+      .addCase(fetchBillings.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBillById.fulfilled, (state, action) => {
+      .addCase(fetchBillings.fulfilled, (state, action) => {
         state.loading = false;
-        state.bill = action.payload;
+        state.billings = action.payload;
       })
-      .addCase(fetchBillById.rejected, (state, action) => {
+      .addCase(fetchBillings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Update bill status
-      .addCase(updateBillStatus.pending, (state) => {
+      // Handle fetchBillingById
+      .addCase(fetchBillingById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateBillStatus.fulfilled, (state, action) => {
+      .addCase(fetchBillingById.fulfilled, (state, action) => {
         state.loading = false;
-        state.bill = action.payload;
-        // Update the status of the bill in the bills array
-        const index = state.bills.findIndex((bill) => bill._id === action.payload._id);
-        if (index !== -1) {
-          state.bills[index] = action.payload;
-        }
+        state.billing = action.payload;
       })
-      .addCase(updateBillStatus.rejected, (state, action) => {
+      .addCase(fetchBillingById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
-  },
+  }
 });
 
+export const { resetBillingState } = billingSlice.actions;
 export default billingSlice.reducer;

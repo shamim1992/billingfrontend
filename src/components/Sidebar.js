@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen }) => {
   ];
 
   return (
-    <aside className={`
+    <aside className={` bg-white
       fixed inset-y-0 left-0 z-50
       w-64 border-r
       transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

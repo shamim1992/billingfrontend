@@ -1,36 +1,43 @@
 // redux/actions/billingActions.js
-import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { baseURL } from '@/ApiUrl';
 
-export const fetchBills = createAsyncThunk('billing/fetchAll', async (_, thunkAPI) => {
-  try {
-    const response = await axios.get('/api/bills');
-    return response.data.bills;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data.message);
+// Create a new billing record
+export const createBilling = createAsyncThunk(
+  'billing/createBilling',
+  async (billingData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${baseURL}/api/billing`, billingData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
-});
+);
 
-export const fetchBillById = createAsyncThunk('billing/fetchById', async (id, thunkAPI) => {
-  try {
-    const response = await axios.get(`/api/bills/${id}`);
-    return response.data.bill;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data.message);
+// Fetch all billing records
+export const fetchBillings = createAsyncThunk(
+  'billing/fetchBillings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${baseURL}/api/billing`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
-});
+);
 
-export const updateBillStatus = createAsyncThunk('billing/updateStatus', async ({ id, paymentStatus }, thunkAPI) => {
-  const token = localStorage.getItem('token');
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  try {
-    const response = await axios.put(`/api/bills/${id}/status`, { paymentStatus }, config);
-    return response.data.bill;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data.message);
+// Fetch a single billing record by ID
+export const fetchBillingById = createAsyncThunk(
+  'billing/fetchBillingById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${baseURL}/api/billing/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
-});
+);

@@ -71,3 +71,23 @@ export const deletePatientbyId = createAsyncThunk('patients/deletePatient', asyn
     return thunkAPI.rejectWithValue(error.response.data.message || 'Failed to delete patient');
   }
 });
+
+// Search patients by query
+export const searchPatients = createAsyncThunk('patients/search', async (query, thunkAPI) => {
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  try {
+    console.log("Sending search request:", query);  // Debugging log
+    const response = await axios.get(`${baseURL}/api/patients/search?query=${query}`, config);
+    console.log("Received search response:", response.data);  // Debugging log
+    return response.data;
+  } catch (error) {
+    console.error("Search request failed:", error.response?.data || error.message);  // Debugging log
+    return thunkAPI.rejectWithValue(error.response.data.message || 'Search failed');
+  }
+});
