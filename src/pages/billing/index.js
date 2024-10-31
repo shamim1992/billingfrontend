@@ -116,8 +116,8 @@ const BillingForm = () => {
   return (
     <Layout>
       <div className="w-full max-w-6xl mx-auto bg-white rounded-lg">
-        <div className="p-6">
-          <h1 className="text-lg font-bold mb-6">Outpatient Bill</h1>
+        <div className="">
+          <h1 className="text-sm font-bold mb-6">Outpatient Bill</h1>
 
           {/* Patient and Doctor Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
