@@ -191,7 +191,7 @@ const PatientForm = () => {
                console.log(formData)
                 await dispatch(createPatient(formData));
                 toast('Patient created successfully!');
-                // router.push('/patients');
+                router.push('/patients');
             } catch (error) {
                 console.error('Error creating patient:', error);
                 setErrors(prev => ({ ...prev, submit: 'Failed to create patient. Please try again.' }));
