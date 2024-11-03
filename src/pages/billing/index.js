@@ -1,354 +1,153 @@
-// /pages/billing/index.js
-import React, { useState, useEffect } from 'react';
-import { Plus, Minus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Eye, Download } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { fetchPatients } from '../../redux/actions/patientActions';
-import { fetchUsers } from '@/redux/actions/userActions';
+import { fetchBillings } from '@/redux/actions/billingActions';
+import Link from 'next/link';
 
-const BillingForm = () => {
+const BillingTable = () => {
   const dispatch = useDispatch();
-  const { patients } = useSelector((state) => state.patients);
-  const { users } = useSelector((state) => state.users);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  
+  // Assuming you have a bills reducer that stores the bills
+  const { billings, loading } = useSelector((state) => state.billing);
+ 
 
-  const [patientQuery, setPatientQuery] = useState('');
-  const [doctorQuery, setDoctorQuery] = useState('');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
-  const [billingItems, setBillingItems] = useState([
-    { id: 1, name: '', code: '', category: '', price: 0, quantity: 1, tax: 0, total: 0 }
-  ]);
-  const [discount, setDiscount] = useState({ type: 'percent', value: 0 });
-  const [payment, setPayment] = useState({ type: '', paid: 0 });
-  const [consultationChecked, setConsultationChecked] = useState(false);
-  const [remarks, setRemarks] = useState('');
-
-  const doctors = users.filter(user => user.role === 'Doctor');
-
-  // Fetch patients and users on initial load
   useEffect(() => {
-    dispatch(fetchPatients());
-    dispatch(fetchUsers());
+    // Assuming you have an action to fetch bills
+    dispatch(fetchBillings());
   }, [dispatch]);
 
-  const handlePatientChange = (e) => {
-    const value = e.target.value;
-    setPatientQuery(value);
-    setShowPatientSuggestions(!!value);
-  };
-
-  const handlePatientSelect = (patient) => {
-    setPatientQuery(`${patient.firstName} ${patient.lastName}`);
-    setShowPatientSuggestions(false);
-  };
-
-  const handleDoctorSelect = (doctorId) => {
-    const doctor = doctors.find(doc => doc._id === doctorId);
-    setSelectedDoctor(doctor);
-    setConsultationChecked(false); // Uncheck consultation when changing doctors
-  };
-
-  const handleConsultationToggle = () => {
-    if (selectedDoctor && selectedDoctor.consultationCharges) {
-      setConsultationChecked(!consultationChecked);
-
-      if (!consultationChecked) {
-        // Add consultation fee item
-        setBillingItems([
-          ...billingItems,
-          {
-            id: billingItems.length + 1,
-            name: 'Consultation Fee',
-            code: 'CONSULT',
-            category: 'Service',
-            price: selectedDoctor.consultationCharges,
-            quantity: 1,
-            tax: 0,
-            total: selectedDoctor.consultationCharges
-          }
-        ]);
-      } else {
-        // Remove consultation fee item
-        setBillingItems(billingItems.filter(item => item.code !== 'CONSULT'));
-      }
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'badge badge-success badge-sm';
+      case 'pending':
+        return 'badge badge-error badge-sm';
+      case 'partial':
+        return 'badge badge-warning badge-sm';
+      default:
+        return 'badge badge-ghost badge-sm';
     }
   };
 
-  const handleItemChange = (index, field, value) => {
-    const updatedItems = [...billingItems];
-    updatedItems[index][field] = value;
-    const price = Number(updatedItems[index].price);
-    const quantity = Number(updatedItems[index].quantity);
-    const tax = Number(updatedItems[index].tax);
-    updatedItems[index].total = (price * quantity) + tax;
-    setBillingItems(updatedItems);
-  };
+  const filteredBills = billings?.filter(billings => {
+    const matchesSearch = 
+    billings.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    billings._id?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = filterStatus === 'all' || billings.status === filterStatus;
+    
+    return matchesSearch && matchesStatus;
+  });
 
-  const addBillingItem = () => {
-    setBillingItems([...billingItems, { id: billingItems.length + 1, name: '', code: '', category: '', price: 0, quantity: 1, tax: 0, total: 0 }]);
-  };
-
-  const removeBillingItem = (index) => {
-    if (billingItems.length > 1) {
-      setBillingItems(billingItems.filter((_, i) => i !== index));
-    }
-  };
-
-  const calculateTotals = () => {
-    const subtotal = billingItems.reduce((sum, item) => sum + item.total, 0);
-    const totalTax = billingItems.reduce((sum, item) => sum + Number(item.tax), 0);
-    let discountAmount = 0;
-
-    if (discount.type === 'percent') {
-      discountAmount = (subtotal * discount.value) / 100;
-    } else {
-      discountAmount = Number(discount.value);
-    }
-
-    const grandTotal = subtotal - discountAmount;
-    const balance = grandTotal - Number(payment.paid);
-
-    return { subtotal, totalTax, grandTotal, balance };
-  };
-
-  const totals = calculateTotals();
+  console.log(filteredBills)
 
   return (
     <Layout>
-      <div className="w-full max-w-6xl mx-auto bg-white rounded-lg">
+      <div className="bg-base-100">
         <div className="">
-          <h1 className="text-sm font-bold mb-6">Outpatient Bill</h1>
-
-          {/* Patient and Doctor Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Patient Search */}
-            <div className="relative text-xs">
-              <label className="block text-xs font-medium mb-2">Patient</label>
-              <input
-                type="text"
-                value={patientQuery}
-                onChange={handlePatientChange}
-                placeholder="Search patient..."
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              {showPatientSuggestions && (
-                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md">
-                  {patients.map(patient => (
-                    <div
-                      key={patient._id}
-                      onClick={() => handlePatientSelect(patient)}
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      {patient.firstName} {patient.lastName} - {patient.patientId}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Doctor Selection */}
-            <div>
-              <label className="block text-xs font-medium mb-2">Doctor</label>
-              <select
-                name="doctor"
-                onChange={(e) => handleDoctorSelect(e.target.value)}
-                className="w-full p-2 border text-xs text-black rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select doctor</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor._id} value={doctor._id}>{doctor.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Consultation Checkbox */}
-            <div className="flex items-center">
-              <label className="inline-flex items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <h2 className="text-xl">Bills</h2>
+            <div className="flex flex-col sm:flex-row gap-2 justify-around">
+              <div className="form-control">
                 <input
-                  type="checkbox"
-                  checked={consultationChecked}
-                  onChange={handleConsultationToggle}
-                  className="form-checkbox h-3 w-3 text-blue-600"
+                  type="text"
+                  placeholder="Search bills..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input input-bordered input-sm w-full max-w-xs"
                 />
-                <span className="ml-2 text-xs">Consultation</span>
-              </label>
+              </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="select select-bordered select-sm w-full max-w-xs"
+              >
+                <option value="all">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="partial">Partial</option>
+              </select>
+
+              <Link href="/billing/addbilling" className='text-xs border px-2 py-2 '>Add billing</Link>
             </div>
           </div>
 
-          {/* Billing Items Table */}
-          <div className="mb-8">
-            <h2 className="text-sm font-medium mb-4">Billing Items</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="p-3 text-left text-xs border">Name</th>
-                    <th className="p-3 text-left text-xs border">Code</th>
-                    <th className="p-3 text-left text-xs border">Category</th>
-                    <th className="p-3 text-left text-xs border">Price (₹)</th>
-                    <th className="p-3 text-left text-xs border">Qty</th>
-                    <th className="p-3 text-left text-xs border">Tax (₹)</th>
-                    <th className="p-3 text-left text-xs border">Total</th>
-                    <th className="p-3 text-center border">Actions</th>
+          <div className="overflow-x-auto">
+            <table className="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Bill No</th>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Amount</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="9" className="text-center">
+                      <span className="loading loading-spinner loading-md"></span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {billingItems.map((item, index) => (
-                    <tr key={item.id}>
-                      <td className="p-2 border">
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          placeholder="Service name"
-                        />
+                ) : filteredBills?.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="text-center">No bills found</td>
+                  </tr>
+                ) : (
+                  filteredBills?.map((bill) => (
+                    <tr key={bill._id}>
+                      <td className="text-sm">{bill._id}</td>
+                      <td className="text-sm">
+                        {new Date(bill.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="p-2 border">
-                        <input
-                          type="text"
-                          value={item.code}
-                          onChange={(e) => handleItemChange(index, 'code', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          placeholder="Code"
-                        />
+                      <td className="text-sm">{bill.patientId.firstName} {bill.patientId.lastName}</td>
+                      <td className="text-sm">{bill.doctorId.name}</td>
+                      <td className="text-sm">₹{bill.totals.grandTotal}</td>
+                      <td className="text-sm">₹{bill.payment.paid}</td>
+                      <td className="text-sm">₹{bill.totals.balance}</td>
+                      <td>
+                        <span className={getStatusBadgeClass(bill.remarks)}>
+                          {bill.remarks}
+                        </span>
                       </td>
-                      <td className="p-2 border">
-                        <input
-                          type="text"
-                          value={item.category}
-                          onChange={(e) => handleItemChange(index, 'category', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          placeholder="Category"
-                        />
-                      </td>
-                      <td className="p-2 border">
-                        <input
-                          type="number"
-                          value={item.price}
-                          onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          min="0"
-                        />
-                      </td>
-                      <td className="p-2 border">
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          min="1"
-                        />
-                      </td>
-                      <td className="p-2 border">
-                        <input
-                          type="number"
-                          value={item.tax}
-                          onChange={(e) => handleItemChange(index, 'tax', e.target.value)}
-                          className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                          min="0"
-                        />
-                      </td>
-                      <td className="p-2 border text-xs text-right">₹{item.total}</td>
-                      <td className="p-2 border">
-                        <div className="flex justify-center space-x-2">
-                          <button onClick={addBillingItem} className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600"><Plus size={16} /></button>
-                          {billingItems.length > 1 && (
-                            <button onClick={() => removeBillingItem(index)} className="p-1 text-white bg-red-500 rounded hover:bg-red-600"><Minus size={16} /></button>
-                          )}
+                      <td>
+                        <div className="flex justify-center gap-2">
+                          <button 
+                            className="btn btn-ghost btn-xs tooltip" 
+                            data-tip="View Bill"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button 
+                            className="btn btn-ghost btn-xs tooltip" 
+                            data-tip="Download Bill"
+                          >
+                            <Download size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
 
-          {/* Discount */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <h3 className="text-sm font-medium mb-4">Discount</h3>
-              <div className="flex items-center space-x-4">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="discountType"
-                    checked={discount.type === 'percent'}
-                    onChange={() => setDiscount({ ...discount, type: 'percent' })}
-                    className="form-radio h-4 w-4 text-blue-600"
-                  />
-                  <span className="ml-2 text-xs">Percentage (%)</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="discountType"
-                    checked={discount.type === 'amount'}
-                    onChange={() => setDiscount({ ...discount, type: 'amount' })}
-                    className="form-radio h-4 w-4 text-blue-600"
-                  />
-                  <span className="ml-2 text-xs">Amount (₹)</span>
-                </label>
-                <input
-                  type="number"
-                  value={discount.value}
-                  onChange={(e) => setDiscount({ ...discount, value: e.target.value })}
-                  className="w-24 p-2 text-xs border rounded-md focus:ring-2 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
+          {/* Pagination - Optional */}
+          <div className="flex justify-end mt-4">
+            <div className="join">
+              <button className="join-item btn btn-sm">«</button>
+              <button className="join-item btn btn-sm">Page 1</button>
+              <button className="join-item btn btn-sm">»</button>
             </div>
-          </div>
-
-          {/* Payment and Remarks */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <h3 className="text-sm font-medium mb-4">Payment</h3>
-              <select
-                value={payment.type}
-                onChange={(e) => setPayment({ ...payment, type: e.target.value })}
-                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Payment Type</option>
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-                <option value="upi">UPI</option>
-              </select>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium mb-4">Remarks</h3>
-              <select
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Remarks</option>
-                <option value="paid">Paid</option>
-                <option value="pending">Payment Pending</option>
-                <option value="partial">Partially Paid</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Totals */}
-          <div className="grid grid-cols-2 gap-4 mb-8 text-xs">
-            <div className="text-right font-medium">Subtotal:</div>
-            <div>₹{totals.subtotal}</div>
-            <div className="text-right font-medium">Total Tax:</div>
-            <div>₹{totals.totalTax}</div>
-            <div className="text-right font-medium">Grand Total:</div>
-            <div>₹{totals.grandTotal}</div>
-            <div className="text-right font-medium">Paid Amount:</div>
-            <div><input type="number" value={payment.paid} onChange={(e) => setPayment({ ...payment, paid: e.target.value })} className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500" min="0"/></div>
-            <div className="text-right font-medium">Balance:</div>
-            <div>₹{totals.balance}</div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-4">
-            <button className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Save Bill</button>
-            <button className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Reset</button>
           </div>
         </div>
       </div>
@@ -356,4 +155,4 @@ const BillingForm = () => {
   );
 };
 
-export default BillingForm;
+export default BillingTable;

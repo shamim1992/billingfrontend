@@ -97,16 +97,14 @@ const Navbar = ({ toggleSidebar }) => {
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-gray-100 rounded-lg relative">
+            {/* <button className="p-2 hover:bg-gray-100 rounded-lg relative">
               <Bell size={20} className="text-gray-600" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-              <input type="checkbox" value="dark" className="toggle theme-controller" />
-            </button>
+            </button> */}
+            
           </div>
 
-          <div className="h-8 w-px bg-gray-200" />
+          {/* <div className="h-8 w-px bg-gray-200" /> */}
 
           <div className="relative" ref={dropdownRef}>
             <button 

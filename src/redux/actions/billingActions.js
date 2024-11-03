@@ -6,9 +6,9 @@ import { baseURL } from '@/ApiUrl';
 // Create a new billing record
 export const createBilling = createAsyncThunk(
   'billing/createBilling',
-  async (billingData, { rejectWithValue }) => {
+  async (billingData, { rejectWithValue }) => {    
     try {
-      const response = await axios.post(`${baseURL}/api/billing`, billingData);
+      const response = await axios.post(`${baseURL}/api/bills`, billingData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -21,7 +21,7 @@ export const fetchBillings = createAsyncThunk(
   'billing/fetchBillings',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${baseURL}/api/billing`);
+      const response = await axios.get(`${baseURL}/api/bills`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
