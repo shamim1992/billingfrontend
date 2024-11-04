@@ -7,7 +7,13 @@ export const fetchDepartments = createAsyncThunk(
   'departments/fetchAll',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get(`${baseURL}/api/department`);
+      const token = localStorage.getItem('token');
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+      const response = await axios.get(`${baseURL}/api/department`, config);
       
       return response.data; // Return the departments data
     } catch (error) {
@@ -20,7 +26,13 @@ export const fetchDepartmentById = createAsyncThunk(
   'departments/fetchById',
   async (id, thunkAPI) => {
     try {
-      const response = await axios.get(`${baseURL}/api/department/${id}`);
+      const token = localStorage.getItem('token');
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+      const response = await axios.get(`${baseURL}/api/department/${id}`, config);
       return response.data; // Return the department data
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.message);
