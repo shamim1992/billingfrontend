@@ -1,6 +1,6 @@
 // redux/slices/billingSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { createBilling, fetchBillings, fetchBillingById } from '../actions/billingActions';
+import { createBilling, fetchBillings, fetchBillingById, updateBilling } from '../actions/billingActions';
 
 const billingSlice = createSlice({
   name: 'billing',
@@ -56,7 +56,22 @@ const billingSlice = createSlice({
       .addCase(fetchBillingById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+
+      // update a bill
+      .addCase(updateBilling.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update both the billing list and current billing detail
+        state.billings = state.billings.map((bill) =>
+          bill._id === action.payload._id ? action.payload : bill
+        );
+        // Update current billing if it matches
+        if (state.billing?._id === action.payload._id) {
+          state.billing = action.payload;
+        }
+      })
+
+
   }
 });
 

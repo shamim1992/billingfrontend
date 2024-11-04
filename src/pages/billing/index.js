@@ -1,48 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Eye, Download } from 'lucide-react';
+import { Eye, Pen, Plus } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { fetchBillings } from '@/redux/actions/billingActions';
 import Link from 'next/link';
+import PDFDownloadButton from './PDFDownloadButton';
 
 const BillingTable = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  
-  // Assuming you have a bills reducer that stores the bills
+
   const { billings, loading } = useSelector((state) => state.billing);
- 
 
   useEffect(() => {
-    // Assuming you have an action to fetch bills
     dispatch(fetchBillings());
   }, [dispatch]);
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'paid':
-        return 'badge badge-success badge-sm';
+        return 'text-success';
       case 'pending':
-        return 'badge badge-error badge-sm';
+        return 'text-error';
       case 'partial':
-        return 'badge badge-warning badge-sm';
+        return 'text-warning';
       default:
-        return 'badge badge-ghost badge-sm';
+        return '';
     }
   };
 
-  const filteredBills = billings?.filter(billings => {
-    const matchesSearch = 
-    billings.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    billings._id?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = filterStatus === 'all' || billings.status === filterStatus;
-    
+  const filteredBills = billings?.filter(bill => {
+    // Check if the patient name exists and matches search query
+    const patientName = `${bill.patientId?.firstName || ''} ${bill.patientId?.lastName || ''}`.toLowerCase();
+    const billId = bill._id?.toLowerCase() || '';
+    const searchTerm = searchQuery.toLowerCase();
+
+    const matchesSearch = patientName.includes(searchTerm) || billId.includes(searchTerm);
+
+    // Check status filter
+    const matchesStatus = filterStatus === 'all' || bill.remarks?.toLowerCase() === filterStatus.toLowerCase();
+
     return matchesSearch && matchesStatus;
   });
-
-  console.log(filteredBills)
 
   return (
     <Layout>
@@ -50,7 +50,7 @@ const BillingTable = () => {
         <div className="">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <h2 className="text-xl">Bills</h2>
-            <div className="flex flex-col sm:flex-row gap-2 justify-around">
+            <div className="flex flex-col sm:flex-row gap-2 justify-between">
               <div className="form-control">
                 <input
                   type="text"
@@ -70,8 +70,12 @@ const BillingTable = () => {
                 <option value="pending">Pending</option>
                 <option value="partial">Partial</option>
               </select>
-
-              <Link href="/billing/addbilling" className='text-xs border px-2 py-2 '>Add billing</Link>
+              <Link
+                href="/billing/addbilling"
+                className="flex items-center justify-center border px-4 rounded-lg text-xs font-semibold hover:shadow"
+              >
+                <Plus size={16}/> Billing
+              </Link>
             </div>
           </div>
 
@@ -90,7 +94,7 @@ const BillingTable = () => {
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className=''>
                 {loading ? (
                   <tr>
                     <td colSpan="9" className="text-center">
@@ -103,35 +107,36 @@ const BillingTable = () => {
                   </tr>
                 ) : (
                   filteredBills?.map((bill) => (
-                    <tr key={bill._id}>
-                      <td className="text-sm">{bill._id}</td>
-                      <td className="text-sm">
+                    <tr key={bill._id} className='text-xs'>
+                      <td className="text-xs">{bill._id}</td>
+                      <td className="text-xs">
                         {new Date(bill.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="text-sm">{bill.patientId.firstName} {bill.patientId.lastName}</td>
-                      <td className="text-sm">{bill.doctorId.name}</td>
-                      <td className="text-sm">₹{bill.totals.grandTotal}</td>
-                      <td className="text-sm">₹{bill.payment.paid}</td>
-                      <td className="text-sm">₹{bill.totals.balance}</td>
+                      <td className="text-xs">{bill.patientId.firstName} {bill.patientId.lastName}</td>
+                      <td className="text-xs">{bill.doctorId.name}</td>
+                      <td className="text-xs">₹{bill.totals.grandTotal}</td>
+                      <td className="text-xs">₹{bill.payment.paid}</td>
+                      <td className="text-xs">₹{bill.totals.balance}</td>
                       <td>
                         <span className={getStatusBadgeClass(bill.remarks)}>
                           {bill.remarks}
                         </span>
                       </td>
                       <td>
-                        <div className="flex justify-center gap-2">
-                          <button 
-                            className="btn btn-ghost btn-xs tooltip" 
+                        <div className="flex justify-center items-center gap-3">
+                          <Link href={'/billing/' + bill._id}
+                            className="tooltip text-green-500"
                             data-tip="View Bill"
                           >
                             <Eye size={16} />
-                          </button>
-                          <button 
-                            className="btn btn-ghost btn-xs tooltip" 
-                            data-tip="Download Bill"
+                          </Link>
+                          <PDFDownloadButton bill={bill} />
+                          <Link href={'/billing/update/' + bill._id}
+                            className="tooltip text-blue-500"
+                            data-tip="Edit Bill"
                           >
-                            <Download size={16} />
-                          </button>
+                            <Pen size={16} />
+                          </Link>
                         </div>
                       </td>
                     </tr>
@@ -141,7 +146,6 @@ const BillingTable = () => {
             </table>
           </div>
 
-          {/* Pagination - Optional */}
           <div className="flex justify-end mt-4">
             <div className="join">
               <button className="join-item btn btn-sm">«</button>

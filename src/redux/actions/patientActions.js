@@ -82,7 +82,7 @@ export const searchPatients = createAsyncThunk('patients/search', async (query, 
   };
 
   try {
-    console.log("Sending search request:", query);  // Debugging log
+
     const response = await axios.get(`${baseURL}/api/patients/search?query=${query}`, config);
     console.log("Received search response:", response.data);  // Debugging log
     return response.data;
