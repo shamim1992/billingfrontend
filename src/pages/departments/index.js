@@ -42,12 +42,12 @@ const DepartmentList = () => {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-50 rounded-md">
+            {/* <button className="p-2 hover:bg-gray-50 rounded-md">
               <Edit size={16} className="text-gray-500" />
-            </button>
-            <button className="p-2 hover:bg-gray-50 rounded-md">
+            </button> */}
+            {/* <button className="p-2 hover:bg-gray-50 rounded-md">
               <Trash size={16} className="text-red-500" />
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

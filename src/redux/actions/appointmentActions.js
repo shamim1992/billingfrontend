@@ -6,8 +6,14 @@ import axios from 'axios';
 
 // Fetch all appointments
 export const fetchAppointments = createAsyncThunk('appointments/fetchAll', async (_, thunkAPI) => {
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   try {
-    const response = await axios.get(`${baseURL}/api/appointments`);
+    const response = await axios.get(`${baseURL}/api/appointments`, config);
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.message);
@@ -79,8 +85,14 @@ export const updateAppointmentStatus = createAsyncThunk('appointments/updateStat
 });
 
 export const fetchAppointmentById = createAsyncThunk('appointments/fetchById', async (id, thunkAPI) => {
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   try {
-    const response = await axios.get(`${baseURL}/api/appointments/${id}`);
+    const response = await axios.get(`${baseURL}/api/appointments/${id}`, config);
     console.log(response.data)
     return response.data;
   } catch (error) {
@@ -92,9 +104,14 @@ export const fetchAppointmentById = createAsyncThunk('appointments/fetchById', a
 export const fetchAppointmentsByPatientId = createAsyncThunk(
   'appointments/fetchByPatientId',
   async (patientId, { rejectWithValue }) => {
-    console.log(patientId)
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     try {
-      const response = await axios.get(`${baseURL}/api/appointments/patient/${patientId}`);
+      const response = await axios.get(`${baseURL}/api/appointments/patient/${patientId}`, config);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
