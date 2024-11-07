@@ -8,7 +8,7 @@ const Sidebar = ({ isOpen }) => {
   const { user } = useSelector((state) => state.auth);
   
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: `/dashboard/${user?.role}` },
+    { name: 'Dashboard', icon: LayoutDashboard, path: `/dashboard/${user?.role.toLowerCase()}` },
     { name: 'Patients', icon: Users, path: '/patients' },
     { name: 'Users', icon: Users, path: '/users' },
     { name: 'Departments', icon: Component, path: '/departments' },

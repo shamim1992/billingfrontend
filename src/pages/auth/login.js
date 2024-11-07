@@ -9,44 +9,26 @@ const Login = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { loading, error, user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (user) {
+      const roleRoutes = {
+        superAdmin: '/dashboard/superAdmin',
+        Admin: '/dashboard/admin',
+        Doctor: '/dashboard/doctor',
+        Receptionist: '/dashboard/receptionist',
+        Accountant: '/dashboard/accountant'
+      };
 
-  // Handle navigation after successful login
-//   useEffect(() => {
-//     if (!user) return;
-// if(user!=='') {
-//     const roleRoutes = {
-//       superAdmin: '/dashboard/superAdmin',
-//       Admin: '/dashboard/admin',
-//       Doctor: '/dashboard/doctor',
-//       Receptionist: '/dashboard/receptionist',
-//       Accountant: '/dashboard/accountant'
-//     };
-
-//     const route = roleRoutes[user.role] || '/';
-//     router.push(route);
-//   }
-//   }, [user, router]);
-
-useEffect(() => {
-  if (user) {
-    const roleRoutes = {
-      superAdmin: '/dashboard/superAdmin',
-      Admin: '/dashboard/admin',
-      Doctor: '/dashboard/doctor',
-      Receptionist: '/dashboard/receptionist',
-      Accountant: '/dashboard/accountant'
-    };
-
-    const route = roleRoutes[user.role] || '/';
-    router.push(route);
-  }
-}, [user, router]);
+      const route = roleRoutes[user.role] || '/';
+      router.push(route);
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await dispatch(login({ email, password })).unwrap();
-      
+
     } catch (err) {
       console.error('Login failed:', err);
     }
