@@ -12,7 +12,7 @@ const Login = () => {
   useEffect(() => {
     if (user) {
       const roleRoutes = {
-        superAdmin: '/dashboard/superAdmin',
+        superAdmin: '/dashboard/superadmin',
         Admin: '/dashboard/admin',
         Doctor: '/dashboard/doctor',
         Receptionist: '/dashboard/receptionist',
