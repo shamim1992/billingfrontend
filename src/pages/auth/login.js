@@ -13,7 +13,7 @@ const Login = () => {
   // Handle navigation after successful login
   useEffect(() => {
     if (!user) return;
-
+if(user!==null) {
     const roleRoutes = {
       superAdmin: '/dashboard/superAdmin',
       Admin: '/dashboard/admin',
@@ -24,6 +24,7 @@ const Login = () => {
 
     const route = roleRoutes[user.role] || '/';
     router.push(route);
+  }
   }, [user, router]);
 
   const handleSubmit = async (e) => {
