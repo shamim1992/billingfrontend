@@ -343,7 +343,7 @@ const ReportPage = () => {
       y: {
         beginAtZero: true,
         ticks: {
-          stepSize: 1
+          stepSize: 10
         }
       }
     }
