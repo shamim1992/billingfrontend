@@ -11,9 +11,24 @@ const Login = () => {
   const { loading, error, user } = useSelector((state) => state.auth);
 
   // Handle navigation after successful login
-  useEffect(() => {
-    if (!user) return;
-if(user!=='') {
+//   useEffect(() => {
+//     if (!user) return;
+// if(user!=='') {
+//     const roleRoutes = {
+//       superAdmin: '/dashboard/superAdmin',
+//       Admin: '/dashboard/admin',
+//       Doctor: '/dashboard/doctor',
+//       Receptionist: '/dashboard/receptionist',
+//       Accountant: '/dashboard/accountant'
+//     };
+
+//     const route = roleRoutes[user.role] || '/';
+//     router.push(route);
+//   }
+//   }, [user, router]);
+
+useEffect(() => {
+  if (user) {
     const roleRoutes = {
       superAdmin: '/dashboard/superAdmin',
       Admin: '/dashboard/admin',
@@ -25,7 +40,7 @@ if(user!=='') {
     const route = roleRoutes[user.role] || '/';
     router.push(route);
   }
-  }, [user, router]);
+}, [user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
