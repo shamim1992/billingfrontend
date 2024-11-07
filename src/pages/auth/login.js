@@ -13,7 +13,7 @@ const Login = () => {
   // Handle navigation after successful login
   useEffect(() => {
     if (!user) return;
-if(user!==null) {
+if(user!=='') {
     const roleRoutes = {
       superAdmin: '/dashboard/superAdmin',
       Admin: '/dashboard/admin',
