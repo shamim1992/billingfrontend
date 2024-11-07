@@ -30,6 +30,7 @@ const Login = () => {
     e.preventDefault();
     try {
       await dispatch(login({ email, password })).unwrap();
+      
     } catch (err) {
       console.error('Login failed:', err);
     }
