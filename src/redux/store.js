@@ -11,6 +11,8 @@ import reportReducer from './slices/reportSlice';
 import userReducer from './slices/userSlice';
 import departmentReducer from './slices/departmentSlice';
 import doctorReducer from './slices/doctorSlice';
+import productReducer from './slices/productSlice';
+import categoryReducer from './slices/categorySlice';
 // Persist Config
 const persistConfig = {
   key: 'root', // Key for the persisted storage
@@ -28,6 +30,8 @@ const rootReducer = combineReducers({
   users: userReducer,
   department: departmentReducer, 
   doctor: doctorReducer,
+  product: productReducer,
+  category: categoryReducer
 });
 
 // Persisted Reducer

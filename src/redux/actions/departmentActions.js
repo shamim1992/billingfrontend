@@ -3,24 +3,49 @@ import axios from 'axios';
 import { baseURL } from '@/ApiUrl'; // Adjust the base URL as necessary
 
 // Fetch all departments action
+// export const fetchDepartments = createAsyncThunk(
+//   'departments/fetchAll',
+//   async (_, thunkAPI) => {
+//     try {
+//       const token = localStorage.getItem('token');
+//   const config = {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   };
+//       const response = await axios.get(`${baseURL}/api/department`, config);
+      
+//       return response.data; // Return the departments data
+//     } catch (error) {
+//       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch departments');
+//     }
+//   }
+// ); 
+
+
+// Fetch all departments action
 export const fetchDepartments = createAsyncThunk(
   'departments/fetchAll',
   async (_, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
       const response = await axios.get(`${baseURL}/api/department`, config);
-      
-      return response.data; // Return the departments data
+      console.log('Departments API response:', response.data);
+      return response.data;
     } catch (error) {
+      console.error('Department fetch error:', error);
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch departments');
     }
   }
-); 
+);
+
+// Other department actions remain the same...
+
 
 export const fetchDepartmentById = createAsyncThunk(
   'departments/fetchById',

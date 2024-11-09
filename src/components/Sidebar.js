@@ -15,6 +15,7 @@ const Sidebar = ({ isOpen }) => {
     { name: 'Appointments', icon: Calendar, path: '/appointments' },
     { name: 'Billing', icon: Receipt, path: '/billing' },
     { name: 'Reports', icon: PieChart, path: '/reports' },
+    { name: 'Products', icon: Calendar, path: '/products' },
   ];
 
   const bottomMenuItems = [

@@ -361,7 +361,8 @@ const BillingForm = () => {
               Reset
             </button>
           </div>
-        </div></div>
+        </div>
+      </div>
     </Layout>
   );
 };

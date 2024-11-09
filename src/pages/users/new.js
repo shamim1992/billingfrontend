@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createUser } from '@/redux/actions/authActions'; // Import the createUser action
+import { createUser } from '@/redux/actions/authActions';
+import { fetchDepartments } from '@/redux/actions/departmentActions';
 import Layout from '../../components/Layout';
 import { UserPlus, User, Mail, Phone, Briefcase, GraduationCap, IndianRupee, EyeClosed } from 'lucide-react';
-import axios from 'axios';
-import { baseURL } from '@/ApiUrl';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
 
 const AddUser = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  
+  // Redux state
   const { loading, error, success } = useSelector((state) => state.users);
+  const { departments } = useSelector((state) => state.department);
 
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
-    username:'',
+    username: '',
     email: '',
-    contactNumber: '', // Fixed from 'contact'
+    contactNumber: '',
     role: '',
     password: '',
     department: '',
@@ -22,14 +28,21 @@ const AddUser = () => {
     consultationCharges: '',
   });
 
-  const [departments, setDepartments] = useState([]); // Store fetched departments
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Fetch departments when role is Doctor
+  useEffect(() => {
+    if (formData.role === 'Doctor') {
+      dispatch(fetchDepartments());
+    }
+  }, [formData.role, dispatch]);
+
+  // Reset form on successful submission
   useEffect(() => {
     if (success) {
       setFormData({
         name: '',
-        username:'',
+        username: '',
         email: '',
         contactNumber: '',
         role: '',
@@ -38,45 +51,71 @@ const AddUser = () => {
         specialization: '',
         consultationCharges: '',
       });
+      toast.success('User created successfully!');
+      router.push('/users'); // Redirect to users list
     }
-  }, [success]);
+  }, [success, router]);
 
-  // Handle input change
+  // Display error if any
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      setErrorMessage(error);
+    }
+  }, [error]);
+
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    // If role is selected as 'Doctor', fetch departments
-    if (name === 'role' && value === 'Doctor') {
-      fetchDepartments();
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Fetch departments from the backend
-  const fetchDepartments = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/api/department`);
-      setDepartments(response.data);
-    } catch (error) {
-      console.error('Failed to fetch departments', error);
+  // Form validation
+  const validateForm = () => {
+    if (!formData.name || !formData.email || !formData.password || !formData.role || !formData.contactNumber) {
+      setErrorMessage('Please fill in all required fields');
+      return false;
     }
+
+    if (formData.role === 'Doctor' && (!formData.department || !formData.specialization || !formData.consultationCharges)) {
+      setErrorMessage('Please fill in all doctor-specific fields');
+      return false;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setErrorMessage('Please enter a valid email address');
+      return false;
+    }
+
+    // Contact number validation (assumes 10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.contactNumber)) {
+      setErrorMessage('Please enter a valid 10-digit contact number');
+      return false;
+    }
+
+    return true;
   };
 
-  // Submit form
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
 
-    // Basic form validation
-    if (!formData.name || !formData.email || !formData.role) {
-      setErrorMessage('Please fill out all required fields.');
+    if (!validateForm()) {
       return;
     }
 
-    // Dispatch the createUser action
-    dispatch(createUser(formData));
+    try {
+      await dispatch(createUser(formData)).unwrap();
+    } catch (err) {
+      setErrorMessage(err.message || 'Failed to create user');
+    }
   };
 
   return (
@@ -89,9 +128,12 @@ const AddUser = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 max-w-xl mx-auto rounded-lg">
-          {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="bg-white p-6 max-w-xl mx-auto rounded-lg shadow-sm">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-gray-700">Name<span className='text-red-500'>*</span></label>
@@ -119,7 +161,7 @@ const AddUser = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter full username"
+                placeholder="Enter username"
                 required
               />
             </div>
@@ -151,23 +193,23 @@ const AddUser = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Password"
+                placeholder="Enter password"
                 required
               />
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Contact<span className='text-red-500'>*</span></label>
+            <label className="block text-gray-700">Contact Number<span className='text-red-500'>*</span></label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                name="contactNumber" // Fixed contact field
+                name="contactNumber"
                 value={formData.contactNumber}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter contact number"
+                placeholder="Enter 10-digit contact number"
                 required
               />
             </div>
@@ -175,22 +217,24 @@ const AddUser = () => {
 
           <div className="mb-4">
             <label className="block text-gray-700">Role<span className='text-red-500'>*</span></label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select Role</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Admin">Admin</option>
-              <option value="Receptionist">Receptionist</option>
-              <option value="Accountant">Accountant</option>
-            </select>
+            <div className="relative">
+              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Role</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Admin">Admin</option>
+                <option value="Receptionist">Receptionist</option>
+                <option value="Accountant">Accountant</option>
+              </select>
+            </div>
           </div>
 
-          {/* Conditionally show department, specialization, and consultation charges fields if role is Doctor */}
           {formData.role === 'Doctor' && (
             <>
               <div className="mb-4">
@@ -201,11 +245,11 @@ const AddUser = () => {
                     name="department"
                     value={formData.department}
                     onChange={handleInputChange}
-                    className="w-full px-4 pl-10 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
-                    <option value="">Select Department<span className='text-red-500'>*</span></option>
-                    {departments.map((dept) => (
+                    <option value="">Select Department</option>
+                    {departments && departments.map((dept) => (
                       <option key={dept._id} value={dept._id}>
                         {dept.name}
                       </option>
@@ -233,7 +277,7 @@ const AddUser = () => {
               <div className="mb-4">
                 <label className="block text-gray-700">Consultation Charges<span className='text-red-500'>*</span></label>
                 <div className="relative">
-                  <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" size={20} />
+                  <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="number"
                     name="consultationCharges"
@@ -248,13 +292,23 @@ const AddUser = () => {
             </>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={loading}
+              className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <UserPlus size={20} />
-              <span>Add User</span>
+              <span>{loading ? 'Adding...' : 'Add User'}</span>
             </button>
           </div>
         </form>

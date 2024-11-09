@@ -18,22 +18,18 @@ const Login = () => {
         Receptionist: '/dashboard/receptionist',
         Accountant: '/dashboard/accountant'
       };
-
       const route = roleRoutes[user.role] || '/';
       router.push(route);
     }
   }, [user, router]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await dispatch(login({ email, password })).unwrap();
-
     } catch (err) {
       console.error('Login failed:', err);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">

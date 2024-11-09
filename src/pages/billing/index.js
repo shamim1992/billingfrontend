@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Eye, Pen, Plus } from 'lucide-react';
+import { Edit, Edit2, Eye, Pen, Plus } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { fetchBillings } from '@/redux/actions/billingActions';
 import Link from 'next/link';
@@ -135,7 +135,7 @@ const BillingTable = () => {
                             className="tooltip text-blue-500"
                             data-tip="Edit Bill"
                           >
-                            <Pen size={16} />
+                            <Edit size={16} />
                           </Link>
                         </div>
                       </td>
