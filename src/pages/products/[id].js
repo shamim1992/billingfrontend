@@ -10,7 +10,7 @@ const ProductView = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { id } = router.query;
-  const { items: products, status } = useSelector((state) => state.product);
+  const { items: products, status } = useSelector((state) => state.products);
   const product = products?.find((p) => p._id === id);
 
   useEffect(() => {

@@ -1,48 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchProducts, deleteProduct } from '../../redux/actions/productActions';
-import { fetchCategories } from '../../redux/actions/categoryActions';
-import Layout from '../../components/Layout';
+import { fetchProducts, deleteProduct } from '@/redux/actions/productActions';
+import { fetchCategories } from '@/redux/actions/categoryActions';
+import Layout from '@/components/Layout';
 import { Search, PlusCircle, Eye, Edit, Trash2, Layers3 } from 'lucide-react';
 
 const ProductList = () => {
   const dispatch = useDispatch();
-  const { items: products, status, error } = useSelector((state) => state.product);
+  // Update the selector to match your Redux state structure
+  const { products, status, error } = useSelector((state) => state.products);
   const { items: categories, status: categoryStatus } = useSelector((state) => state.category);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('Products from Redux:', products);
+    console.log('Redux Status:', status);
+  }, [products, status]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(10); // Adjust the number of items per page
+  const [productsPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(fetchProducts());
-    dispatch(fetchCategories());
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(fetchProducts()),
+          dispatch(fetchCategories())
+        ]);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   const handleDelete = async (id) => {
-    await dispatch(deleteProduct(id));
-    setCurrentPage(1); // Reset to first page after deleting
+    try {
+      await dispatch(deleteProduct(id));
+      setCurrentPage(1);
+      toast.success('Product deleted successfully');
+    } catch (error) {
+      toast.error('Error deleting product');
+    }
   };
 
   const filteredProducts = products?.filter((product) => {
-    const matchesSearch =
-      (product.productname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.productcode?.includes(searchTerm)) ?? false;
+    if (!product) return false;
+    
+    const matchesSearch = 
+      product.productname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.productcode?.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (selectedFilter === 'all') return matchesSearch;
-
-    return product.category?._id === selectedFilter && matchesSearch;
-  });
+    
+    return matchesSearch && product.category?._id === selectedFilter;
+  }) || [];
 
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -52,7 +88,7 @@ const ProductList = () => {
             <h1 className="text-md font-semibold">Products</h1>
             <p className="mt-1 text-xs">Manage your products and inventory</p>
           </div>
-          <div>
+          <div className="flex gap-2">
             <Link href="/products/category">
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl hover:shadow-md border transition-colors">
                 <Layers3 size={20} />
@@ -73,7 +109,7 @@ const ProductList = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={20} />
             <input
               type="text"
-              placeholder="Search products (Name, ID)"
+              placeholder="Search products (Name, Code)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -86,15 +122,11 @@ const ProductList = () => {
               className="px-4 text-xs py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Products</option>
-              {categoryStatus === 'loading' ? (
-                <option>Loading...</option>
-              ) : (
-                categories?.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.categoryName}
-                  </option>
-                ))
-              )}
+              {categories?.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.categoryName}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -104,7 +136,6 @@ const ProductList = () => {
         <table className="min-w-full rounded-lg">
           <thead>
             <tr>
-
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Name</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Product Code</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Category</th>
@@ -113,31 +144,48 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody>
-            {currentProducts?.map((product) => (
-              <tr key={product._id}>
-                <td className="px-6 py-2 border-b text-xs">{product.productname}</td>
-                <td className="px-6 py-2 border-b text-xs">{product.productcode}</td>
-                <td className="px-6 py-2 border-b text-xs capitalize">{product.category.categoryName}</td>
-                <td className="px-6 py-2 border-b text-xs">&#x20B9; {product.price}</td>
-                <td className="px-6 py-2 border-b text-xs text-blue-600 hover:text-blue-700">
-                  <div className="flex gap-2 justify-center items-center">
-                    <Link href={`/products/${product._id}`} data-tip ="View Details" className='tooltip'>
-                      <Eye size={16} />
-                    </Link>
-                    <Link href={`/products/edit/${product._id}`} data-tip ="Edit" className='tooltip'>
-                      <Edit size={16} />
-                    </Link>
-                    <button data-tip ="Delete" onClick={() => handleDelete(product._id)} className="text-red-500 tooltip">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {currentProducts?.length === 0 && (
+            {currentProducts.length > 0 ? (
+              currentProducts.map((product) => (
+                <tr key={product._id}>
+                  <td className="px-6 py-2 border-b text-xs">{product.productname}</td>
+                  <td className="px-6 py-2 border-b text-xs">{product.productcode}</td>
+                  <td className="px-6 py-2 border-b text-xs capitalize">
+                    {product.category?.categoryName}
+                  </td>
+                  <td className="px-6 py-2 border-b text-xs">₹{product.price}</td>
+                  <td className="px-6 py-2 border-b text-xs">
+                    <div className="flex gap-2 justify-center items-center">
+                      <Link 
+                        href={`/products/${product._id}`} 
+                        className="tooltip" 
+                        data-tip="View Details"
+                      >
+                        <Eye size={16} />
+                      </Link>
+                      <Link 
+                        href={`/products/edit/${product._id}`} 
+                        className="tooltip" 
+                        data-tip="Edit"
+                      >
+                        <Edit size={16} />
+                      </Link>
+                      <button 
+                        className="text-red-500 tooltip" 
+                        data-tip="Delete"
+                        onClick={() => handleDelete(product._id)}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan="5" className="text-center py-6 text-gray-500 text-xs">
-                  No products found. Try adjusting your search or filter.
+                  {searchTerm || selectedFilter !== 'all' 
+                    ? 'No products found. Try adjusting your search or filter.'
+                    : 'No products available. Add some products to get started.'}
                 </td>
               </tr>
             )}
@@ -145,18 +193,23 @@ const ProductList = () => {
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => paginate(index + 1)}
-            className={`text-xs px-3 py-1 mx-1 border rounded-lg ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => paginate(index + 1)}
+              className={`text-xs px-3 py-1 mx-1 border rounded-lg ${
+                currentPage === index + 1 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white text-blue-600'
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
     </Layout>
   );
 };

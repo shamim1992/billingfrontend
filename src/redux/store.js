@@ -30,7 +30,7 @@ const rootReducer = combineReducers({
   users: userReducer,
   department: departmentReducer, 
   doctor: doctorReducer,
-  product: productReducer,
+  products: productReducer,
   category: categoryReducer
 });
 

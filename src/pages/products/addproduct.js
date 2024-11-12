@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const AddProduct = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { status: productStatus, error: productError } = useSelector((state) => state.product);
+  const { status: productStatus, error: productError } = useSelector((state) => state.products);
   const { items: categories, status: categoryStatus } = useSelector((state) => state.category);
 
   const [formData, setFormData] = useState({

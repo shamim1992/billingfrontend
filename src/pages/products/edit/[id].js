@@ -12,7 +12,7 @@ const EditProduct = () => {
   const router = useRouter();
   const { id } = router.query;
   
-  const { items: products, status } = useSelector((state) => state.product);
+  const { items: products, status } = useSelector((state) => state.products);
   const { items: categories, status: categoryStatus } = useSelector((state) => state.category);
 
   const product = products?.find((p) => p._id === id);

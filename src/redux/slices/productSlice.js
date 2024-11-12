@@ -1,10 +1,11 @@
+// productSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../actions/productActions';
 
 const productSlice = createSlice({
     name: 'products',
     initialState: {
-        items: [],
+        products: [], // Changed from items to products
         status: 'idle',
         error: null
     },
@@ -17,7 +18,7 @@ const productSlice = createSlice({
             })
             .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = action.payload;
+                state.products = action.payload; // Changed from items to products
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.status = 'failed';
@@ -29,7 +30,7 @@ const productSlice = createSlice({
             })
             .addCase(createProduct.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items.push(action.payload);
+                state.products.push(action.payload); // Changed from items to products
             })
             .addCase(createProduct.rejected, (state, action) => {
                 state.status = 'failed';
@@ -41,8 +42,8 @@ const productSlice = createSlice({
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                const index = state.items.findIndex((product) => product._id === action.payload._id);
-                if (index !== -1) state.items[index] = action.payload;
+                const index = state.products.findIndex((product) => product._id === action.payload._id); // Changed from items to products
+                if (index !== -1) state.products[index] = action.payload;
             })
             .addCase(updateProduct.rejected, (state, action) => {
                 state.status = 'failed';
@@ -54,7 +55,7 @@ const productSlice = createSlice({
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = state.items.filter((product) => product._id !== action.payload);
+                state.products = state.products.filter((product) => product._id !== action.payload); // Changed from items to products
             })
             .addCase(deleteProduct.rejected, (state, action) => {
                 state.status = 'failed';
