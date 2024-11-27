@@ -1,5 +1,5 @@
 
-import '../styles/globals.css'; // Global CSS styles
+import '../styles/globals.css';
 import { Provider } from 'react-redux';
 import store, { persistor } from '../redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 function MyApp({ Component, pageProps }) {
   return (
     <Provider store={store}>
-      {/* PersistGate delays the rendering of the app's UI until the persisted state has been rehydrated */}
       <PersistGate loading={null} persistor={persistor}>
         <Component {...pageProps} />
         <ToastContainer
