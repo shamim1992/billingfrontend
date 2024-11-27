@@ -77,14 +77,14 @@ const ReportPage = () => {
       selector: (row) => dayjs(row.date).format('DD/MM/YYYY'),
       sortable: true
     },
-  
+
     {
       name: 'Status',
       selector: (row) => row.paymentStatus,
       cell: (row) => (
         <div className={` ${row.paymentStatus === 'Paid' ? 'text-success' :
-            row.paymentStatus === 'PENDING' ? 'badge-warning' :
-              'badge-error'
+          row.paymentStatus === 'PENDING' ? 'badge-warning' :
+            'badge-error'
           }`}>
           {row.paymentStatus}
         </div>
@@ -96,8 +96,8 @@ const ReportPage = () => {
       selector: (row) => row.paymentStatus,
       cell: (row) => (
         <div className={` ${row.paymentStatus === 'Paid' ? 'text-dark-500' :
-            row.paymentStatus === 'PENDING' ? 'badge-warning' :
-              'badge-error'
+          row.paymentStatus === 'PENDING' ? 'badge-warning' :
+            'badge-error'
           }`}>
           {row.consultationFee}
         </div>
@@ -109,7 +109,7 @@ const ReportPage = () => {
       selector: (row) => row.paymentStatus,
       cell: (row) => (
         <Link href={`/appointments/${row._id}`} className='text-blue-500'>
-         <Eye/>
+          <Eye />
         </Link>
       ),
       sortable: true
@@ -413,6 +413,38 @@ const ReportPage = () => {
           </div>
         </div>
 
+        <div className='flex flex-row justify-center items gap-2'>
+          <div>
+            <div className="card bg-base-100 border">
+              <div className="card-body">
+             
+                <div className="card-actions justify-end">
+                  <Link href={'/reports/audit'} className="bg-blue-500 text-white px-4 py-2 text-xs ">Audit Report</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="card bg-base-100 border">
+              <div className="card-body">
+                <div className="card-actions justify-end">
+                  <button className="bg-blue-500 text-white px-4 py-2 text-xs ">Consultation Wise Report</button>
+                </div>
+              </div>
+            </div>
+            </div>
+          <div>
+          <div className="card bg-base-100 border">
+              <div className="card-body">
+                <div className="card-actions justify-end">
+                  <Link href={'/reports/collection'} className="bg-blue-500 text-white px-4 py-2 text-xs ">Collections</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         {/* Consultation Fee Summary */}
 
 
@@ -421,7 +453,7 @@ const ReportPage = () => {
           <div className="stats border">
             <div className="stat">
               <div className="stat-figure text-success">
-               
+
               </div>
               <div className="text-sm">Today</div>
               <div className=" text-xs flex  items-center py-3"> <IndianRupeeIcon size={14} /> {consultationFees.daily.total.toLocaleString()}</div>
@@ -433,7 +465,7 @@ const ReportPage = () => {
 
           <div className="stats border">
             <div className="stat">
-            
+
               <div className="text-sm">This Month</div>
               <div className=" text-xs flex  items-center py-3"> <IndianRupeeIcon size={14} />{consultationFees.monthly.total.toLocaleString()}</div>
               <div className="stat-desc flex justify-end">
@@ -444,7 +476,7 @@ const ReportPage = () => {
 
           <div className="stats border">
             <div className="stat">
-              
+
               <div className="text-sm">This Year</div>
               <div className=" text-xs flex  items-center py-3"> <IndianRupeeIcon size={14} />{consultationFees.yearly.total.toLocaleString()}</div>
               <div className="stat-desc flex justify-end">

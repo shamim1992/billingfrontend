@@ -94,10 +94,10 @@ const BillPDF = ({ bill }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        {/* <Text style={styles.title}>INVOICE</Text>
-        <Text style={styles.companyInfo}>Your Hospital Name</Text>
-        <Text style={styles.companyInfo}>Address Line 1, Address Line 2</Text>
-        <Text style={styles.companyInfo}>Phone: (123) 456-7890</Text> */}
+        <Text style={styles.title}>ChanRe Veena Rheumatology & Immunology Center</Text>
+        <Text style={styles.companyInfo}>#531/B, Ground Floor, 19th MAIN, 3rd SECTOR HSR LAYOUT, BANGALORE 560102</Text>
+        <Text style={styles.companyInfo}>Contact: +91 9856000000</Text>
+        <Text style={styles.companyInfo}>Email: corporaterelation@chanrericr.com</Text>
       </View>
 
       <View style={styles.billInfo}>

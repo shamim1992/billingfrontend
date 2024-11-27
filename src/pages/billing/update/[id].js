@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { fetchBillingById, updateBilling } from '@/redux/actions/billingActions';
 import { fetchPatients } from '@/redux/actions/patientActions';
 import { fetchUsers } from '@/redux/actions/userActions';
+import { fetchProducts } from '@/redux/actions/productActions';
 
 const UpdateBilling = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const UpdateBilling = () => {
   const { billing, loading } = useSelector((state) => state.billing);
   const { patients } = useSelector((state) => state.patients);
   const { users } = useSelector((state) => state.users);
+  const { products } = useSelector((state) => state.products);
 
   const [patientQuery, setPatientQuery] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -27,11 +29,16 @@ const UpdateBilling = () => {
   const [payment, setPayment] = useState({ type: '', paid: 0 });
   const [remarks, setRemarks] = useState('');
 
+  // Product search state
+  const [searchQueries, setSearchQueries] = useState({});
+  const [activeSearchIndex, setActiveSearchIndex] = useState(null);
+
   const doctors = users.filter(user => user.role === 'Doctor');
 
   useEffect(() => {
     dispatch(fetchPatients());
     dispatch(fetchUsers());
+    dispatch(fetchProducts());
     if (id) {
       dispatch(fetchBillingById(id));
     }
@@ -66,6 +73,51 @@ const UpdateBilling = () => {
     setConsultationChecked(false);
   };
 
+  // Product search and filtering functions
+  const getFilteredProducts = (searchQuery) => {
+    if (!searchQuery || !products) return [];
+    return products.filter(product =>
+      product.productname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.productcode?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const handleProductSearch = (index, value) => {
+    setSearchQueries(prev => ({
+      ...prev,
+      [index]: value
+    }));
+    setActiveSearchIndex(index);
+
+    const updatedItems = [...billingItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      name: value
+    };
+    setBillingItems(updatedItems);
+  };
+
+  const handleProductSelect = (product, index) => {
+    const updatedItems = [...billingItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      name: product.productname,
+      code: product.productcode,
+      category: product.servicetype,
+      price: parseFloat(product.price),
+      tax: parseFloat(product.tax),
+      quantity: 1,
+      total: parseFloat(product.price) + parseFloat(product.tax)
+    };
+    setBillingItems(updatedItems);
+    
+    setSearchQueries(prev => ({
+      ...prev,
+      [index]: product.productname
+    }));
+    setActiveSearchIndex(null);
+  };
+
   const handleConsultationToggle = () => {
     if (selectedDoctor && selectedDoctor.consultationCharges) {
       setConsultationChecked(!consultationChecked);
@@ -91,8 +143,19 @@ const UpdateBilling = () => {
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...billingItems];
-    updatedItems[index][field] = value;
-    updatedItems[index].total = updatedItems[index].price * updatedItems[index].quantity + updatedItems[index].tax;
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: value
+    };
+
+    // Recalculate total when quantity changes
+    if (field === 'quantity') {
+      const price = parseFloat(updatedItems[index].price);
+      const quantity = parseInt(value);
+      const tax = parseFloat(updatedItems[index].tax);
+      updatedItems[index].total = (price * quantity) + tax;
+    }
+
     setBillingItems(updatedItems);
   };
 
@@ -106,6 +169,12 @@ const UpdateBilling = () => {
   const removeBillingItem = (index) => {
     if (billingItems.length > 1) {
       setBillingItems(billingItems.filter((_, i) => i !== index));
+      // Clear search queries for removed item
+      setSearchQueries(prev => {
+        const newQueries = { ...prev };
+        delete newQueries[index];
+        return newQueries;
+      });
     }
   };
 
@@ -119,10 +188,9 @@ const UpdateBilling = () => {
     return { subtotal, totalTax, grandTotal, balance };
   };
 
-  const totals = calculateTotals();
-
   const handleUpdateBill = () => {
     if (selectedPatient && selectedDoctor) {
+      const totals = calculateTotals();
       const billingData = {
         patientId: selectedPatient._id,
         doctorId: selectedDoctor._id,
@@ -140,6 +208,8 @@ const UpdateBilling = () => {
 
   if (loading) return <p>Loading...</p>;
 
+  const totals = calculateTotals();
+
   return (
     <Layout>
       <div className="w-full max-w-6xl mx-auto bg-white rounded-lg p-6">
@@ -151,7 +221,7 @@ const UpdateBilling = () => {
             <label className="block text-xs font-medium mb-2">Patient</label>
             <input
               type="text"
-              value={patientQuery}
+              value={`${billing?.patientId.firstName +' '+ billing?.patientId.lastName}`}
               onChange={handlePatientChange}
               placeholder="Search patient..."
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -200,7 +270,7 @@ const UpdateBilling = () => {
         {/* Billing Items Table */}
         <div className="mb-8">
           <h2 className="text-sm font-medium mb-4">Billing Items</h2>
-          <div className="overflow-x-auto">
+          <div className="">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50">
@@ -217,40 +287,52 @@ const UpdateBilling = () => {
               <tbody>
                 {billingItems.map((item, index) => (
                   <tr key={item.id}>
-                    <td className="p-2 border">
+                    <td className="p-2 border relative">
                       <input
                         type="text"
-                        value={item.name}
-                        onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+                        value={searchQueries[index] || item.name}
+                        onChange={(e) => handleProductSearch(index, e.target.value)}
+                        onFocus={() => setActiveSearchIndex(index)}
                         className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        placeholder="Service name"
+                        placeholder="Search product..."
                       />
+                      {activeSearchIndex === index && searchQueries[index] && (
+                        <ul className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 ">
+                          {getFilteredProducts(searchQueries[index]).map((product) => (
+                            <li
+                              key={product._id}
+                              onClick={() => handleProductSelect(product, index)}
+                              className="p-2 text-xs hover:bg-gray-100 cursor-pointer"
+                            >
+                              <div>{product.productname}</div>
+                              <div className="text-gray-500">Price: ₹{product.price}</div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </td>
                     <td className="p-2 border">
                       <input
                         type="text"
                         value={item.code}
-                        onChange={(e) => handleItemChange(index, 'code', e.target.value)}
+                        readOnly
                         className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        placeholder="Code"
                       />
                     </td>
                     <td className="p-2 border">
                       <input
                         type="text"
                         value={item.category}
-                        onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                        readOnly
                         className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        placeholder="Category"
                       />
                     </td>
                     <td className="p-2 border">
                       <input
                         type="number"
                         value={item.price}
-                        onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                        readOnly
                         className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        min="0"
                       />
                     </td>
                     <td className="p-2 border">
@@ -258,17 +340,16 @@ const UpdateBilling = () => {
                         type="number"
                         value={item.quantity}
                         onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                        className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
                         min="1"
+                        className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
                       />
                     </td>
                     <td className="p-2 border">
                       <input
                         type="number"
                         value={item.tax}
-                        onChange={(e) => handleItemChange(index, 'tax', e.target.value)}
+                        readOnly
                         className="w-full text-xs p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        min="0"
                       />
                     </td>
                     <td className="p-2 border text-xs text-right">₹{item.total}</td>
@@ -288,7 +369,7 @@ const UpdateBilling = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
         </div>
 
         {/* Discount and Payment Details */}

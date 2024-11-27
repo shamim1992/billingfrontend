@@ -314,17 +314,17 @@ const BillingForm = () => {
 
   return (
     <Layout>
-      <div className=" bg-base-100">
+      <div className="">
         <div className="">
-          <h2 className="">Create Bill</h2>
-          <p className="text-sm text-base-content/70">Create a new bill for patient services</p>
+          <h2 className="text-sm">Create Bill</h2>
+          <p className="text-xs">Create a new bill for patient services</p>
 
           {/* Patient and Doctor Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Patient Selection */}
             <div className="form-control">
               <label className="label">
-                <span className="">Patient</span>
+                <span className="text-xs">Patient</span>
               </label>
               <div className="relative">
                 <input
@@ -336,7 +336,7 @@ const BillingForm = () => {
                     showPatientSuggestions: true
                   }))}
                   placeholder="Search patient..."
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-xs rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 
                 {formState.showPatientSuggestions && formState.patientQuery && (
@@ -363,10 +363,10 @@ const BillingForm = () => {
             {/* Doctor Selection */}
             <div className="form-control">
               <label className="label">
-                <span className="">Doctor</span>
+                <span className="text-xs">Doctor</span>
               </label>
               <select
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 text-xs border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 onChange={handleDoctorSelect}
                 value={formState.selectedDoctor?._id || ''}
               >
@@ -380,24 +380,24 @@ const BillingForm = () => {
             </div>
 
             {/* Consultation Checkbox */}
-            <div className="form-control">
-              <label className="label cursor-pointer">
-                <span className="">Add Consultation Fee</span>
+            <div className="form-control ">
+              <div className="flex justify-center items-center p-2 gap-2">
+                <span className="text-xs">Consultation</span>
                 <input
                   type="checkbox"
                   checked={formState.consultationChecked}
                   onChange={handleConsultationToggle}
                   className="checkbox "
                 />
-              </label>
+              </div>
             </div>
           </div>
 
           {/* Billing Items Table */}
-          <div className="">
+          <div className="text-xs">
             <table className="table my-4">
               <thead>
-                <tr>
+                <tr className='text-xs'>
                   <th>Name</th>
                   <th>Code</th>
                   <th>Category</th>
@@ -410,7 +410,7 @@ const BillingForm = () => {
               </thead>
               <tbody>
                 {billingItems.map((item, index) => (
-                  <tr key={item.id}>
+                  <tr key={item.id} className='text-xs'>
                     <td className="relative">
                       <input
                         type="text"
@@ -484,11 +484,11 @@ const BillingForm = () => {
                     <td>₹{item.total.toFixed(2)}</td>
                     <td>
                       <div className="flex space-x-2">
-                        <button onClick={addBillingItem} className="btn btn-sm btn-circle btn-primary">
+                        <button onClick={addBillingItem} className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600">
                           <Plus className="h-4 w-4" />
                         </button>
                         {billingItems.length > 1 && (
-                          <button onClick={() => removeBillingItem(index)} className="btn btn-sm btn-circle btn-error">
+                          <button onClick={() => removeBillingItem(index)} className="p-1 text-white bg-red-500 rounded hover:bg-red-600">
                             <Minus className="h-4 w-4" />
                           </button>
                         )}
@@ -504,7 +504,7 @@ const BillingForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="form-control">
               <label className="label">
-                <span className="">Discount Type</span>
+                <span className="text-xs">Discount Type</span>
               </label>
               <div className="flex items-center space-x-4">
                 <label className="label cursor-pointer">
@@ -518,7 +518,7 @@ const BillingForm = () => {
                       discount: { ...prev.discount, type: 'percent' }
                     }))}
                   />
-                  <span className="ml-2">Percentage (%)</span>
+                  <span className="ml-2 text-xs">Percentage (%)</span>
                 </label>
                 <label className="label cursor-pointer">
                   <input
@@ -531,7 +531,7 @@ const BillingForm = () => {
                       discount: { ...prev.discount, type: 'amount' }
                     }))}
                   />
-                  <span className="ml-2">Amount (₹)</span>
+                  <span className="ml-2 text-xs">Amount (₹)</span>
                 </label>
                 <input
                   type="number"
@@ -540,7 +540,7 @@ const BillingForm = () => {
                     ...prev,
                     discount: { ...prev.discount, value: e.target.value }
                   }))}
-                  className="input input-bordered input-sm w-24"
+                  className="input input-bordered text-xs input-sm w-24"
                   min="0"
                 />
               </div>
@@ -552,10 +552,10 @@ const BillingForm = () => {
             {/* Payment Type */}
             <div className="form-control">
               <label className="label">
-                <span className="">Payment Type</span>
+                <span className="text-xs">Payment Type</span>
               </label>
               <select
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={formState.payment.type}
                 onChange={(e) => setFormState(prev => ({
                   ...prev,
@@ -572,13 +572,13 @@ const BillingForm = () => {
             {/* Remarks - Now Read Only */}
             <div className="form-control">
               <label className="label">
-                <span className="">Remarks</span>
+                <span className="text-xs">Remarks</span>
               </label>
               <input
                 type="text"
                 value={formState.remarks}
                 readOnly
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -618,13 +618,13 @@ const BillingForm = () => {
           <div className="flex justify-end space-x-4">
             <button
               onClick={handleSaveBill}
-              className="btn btn-success"
+              className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-500"
             >
               Save Bill
             </button>
             <button
               onClick={resetForm}
-              className="btn btn-error"
+              className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
             >
               Reset
             </button>

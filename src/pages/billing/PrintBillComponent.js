@@ -25,8 +25,13 @@ const PrintBillComponent = ({ bill }) => {
       <div id="printable-bill" className="hidden">
         <div className="p-8 max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mt-24 mb-6">
-            {/* <h1 className="text-2xl text-center mb-4">INVOICE</h1> */}
+          <div className="mt-10 mb-6">
+            <h1 className="text-xl text-center mb-4">Chanre Veena Rheumatology And Immunology Center</h1>
+            <div className='text-center text-xs px-6'>
+<h3>#531/B, Ground Floor, 19th MAIN, 3rd SECTOR HSR LAYOUT, BANGALORE 560102</h3>
+            </div>
+            
+
           </div>
 
           {/* Bill Info */}
