@@ -3,10 +3,40 @@ import { baseURL } from '@/ApiUrl';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+export const createUser = createAsyncThunk('users/create', async (userData, thunkAPI) => {
+  const token = localStorage.getItem('token'); 
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`, 
+    },
+  };
+  try {
+    const response = await axios.post(`${baseURL}/api/auth/register`, userData, config);
+    console.log(response)
+    return response.data.user;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data.message || 'Failed to create user');
+  }
+});
 
 
+// export const createUser = createAsyncThunk('users/create', async (userData, thunkAPI) => {
+//   const token = localStorage.getItem('token');
+//   const config = {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//       'Content-Type': 'application/json',
+//     },
+//   };
 
+//   try {
+//     const response = await axios.post(`${baseURL}/api/users`, userData, config);
+//     return response.data; // Return the created user data
+//   } catch (error) {
+//     return thunkAPI.rejectWithValue(error.response.data.message || 'Failed to create user');
+//   }
+// });
 
 
 

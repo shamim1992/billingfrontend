@@ -35,6 +35,7 @@ const BillingForm = () => {
     discount: { type: 'percent', value: 0 },
     payment: { type: '', paid: 0 },
     consultationChecked: false,
+    createdBy: users?._id
   });
 
   const [billingItems, setBillingItems] = useState([
@@ -268,7 +269,8 @@ const BillingForm = () => {
       discount: formState.discount,
       payment: formState.payment,
       remarks: formState.remarks,
-      totals
+      totals,
+      createdBy: users?._id
     };
 
     dispatch(createBilling(billingData))

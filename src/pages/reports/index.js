@@ -428,7 +428,7 @@ const ReportPage = () => {
             <div className="card bg-base-100 border">
               <div className="card-body">
                 <div className="card-actions justify-end">
-                  <button className="bg-blue-500 text-white px-4 py-2 text-xs ">Consultation Wise Report</button>
+                  <Link  href={'/reports/usercollection'} className="bg-blue-500 text-white px-4 py-2 text-xs ">User Wise Report</Link>
                 </div>
               </div>
             </div>

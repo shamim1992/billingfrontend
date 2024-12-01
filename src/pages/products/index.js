@@ -11,6 +11,7 @@ const ProductList = () => {
   // Update the selector to match your Redux state structure
   const { products, status, error } = useSelector((state) => state.products);
   const { items: categories, status: categoryStatus } = useSelector((state) => state.category);
+ 
 
   // Debug logs
   useEffect(() => {
@@ -23,6 +24,16 @@ const ProductList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
+
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,6 +150,7 @@ const ProductList = () => {
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Name</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Product Code</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Category</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-semibold">Service Type</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Price</th>
               <th className="px-6 py-3 border-b text-left text-xs font-semibold">Actions</th>
             </tr>
@@ -152,12 +164,13 @@ const ProductList = () => {
                   <td className="px-6 py-2 border-b text-xs capitalize">
                     {product.category?.categoryName}
                   </td>
+                  <td className="px-6 py-2 border-b text-xs">{product.servicetype}</td>
                   <td className="px-6 py-2 border-b text-xs">₹{product.price}</td>
                   <td className="px-6 py-2 border-b text-xs">
                     <div className="flex gap-2 justify-center items-center">
                       <Link 
                         href={`/products/${product._id}`} 
-                        className="tooltip" 
+                        className="tooltip text-blue-500" 
                         data-tip="View Details"
                       >
                         <Eye size={16} />
@@ -194,21 +207,25 @@ const ProductList = () => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => paginate(index + 1)}
-              className={`text-xs px-3 py-1 mx-1 border rounded-lg ${
-                currentPage === index + 1 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white text-blue-600'
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
+        <div className="flex justify-end mt-4">
+        <div className="join">
+          <button 
+            className={`join-item btn btn-sm ${currentPage === 1 ? 'btn-disabled' : ''}`}
+            onClick={handlePrevPage}
+          >
+            «
+          </button>
+          <button className="join-item btn btn-sm">
+            Page {currentPage} of {totalPages}
+          </button>
+          <button 
+            className={`join-item btn btn-sm ${currentPage === totalPages ? 'btn-disabled' : ''}`}
+            onClick={handleNextPage}
+          >
+            »
+          </button>
         </div>
+      </div>
       )}
     </Layout>
   );

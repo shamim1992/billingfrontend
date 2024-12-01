@@ -18,6 +18,7 @@ export const createBilling = createAsyncThunk(
     try {
 
       const response = await axios.post(`${baseURL}/api/bills`, billingData, config);;
+      console.log(billingData)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

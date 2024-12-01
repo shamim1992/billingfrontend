@@ -1,6 +1,6 @@
 // redux/slices/authSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { login , createUser} from '../actions/authActions';
+import { login } from '../actions/authActions';
 
 const initialState = {
   user: null,
@@ -38,19 +38,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       });
 
-      builder
-      .addCase(createUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user.push(action.payload);
-      })
-      .addCase(createUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+     
   },
 });
 

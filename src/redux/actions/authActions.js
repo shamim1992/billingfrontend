@@ -33,18 +33,3 @@ export const fetchProfile = createAsyncThunk('auth/profile', async (_, thunkAPI)
 });
 
 
-export const createUser = createAsyncThunk('users/create', async (userData, thunkAPI) => {
-  const token = localStorage.getItem('token'); 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`, 
-    },
-  };
-  try {
-    const response = await axios.post(`${baseURL}/api/auth/register`, userData, config);
-    console.log(response)
-    return response.data.user;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data.message || 'Failed to create user');
-  }
-});

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createUser } from '@/redux/actions/authActions';
+import { createUser } from '@/redux/actions/userActions';
 import { fetchDepartments } from '@/redux/actions/departmentActions';
 import Layout from '../../components/Layout';
 import { UserPlus, User, Mail, Phone, Briefcase, GraduationCap, IndianRupee, EyeClosed } from 'lucide-react';
@@ -112,6 +112,7 @@ const AddUser = () => {
     }
 
     try {
+      
       await dispatch(createUser(formData)).unwrap();
     } catch (err) {
       setErrorMessage(err.message || 'Failed to create user');

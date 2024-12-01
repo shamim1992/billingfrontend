@@ -121,7 +121,7 @@ const Navbar = ({ toggleSidebar }) => {
               </div>
               <div className="hidden md:block text-left">
                 <div className="text-sm font-medium">{user ? user.name : 'Guest'}</div>
-                <div className="text-xs text-gray-500 capitalize">{user ? user.role : ''}</div>
+                {/* <div className="text-xs text-gray-500 capitalize">{user ? user.role : ''}</div> */}
               </div>
               <ChevronDown 
                 size={16} 
