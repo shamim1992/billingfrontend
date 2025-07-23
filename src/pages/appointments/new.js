@@ -133,7 +133,7 @@ const NewAppointment = () => {
                   value={formData.patientId}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter 5-digit Patient ID"
+                  placeholder="Enter Patient ID"
                   required
                 />
               </div>

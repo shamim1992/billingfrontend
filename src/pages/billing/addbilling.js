@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Minus, Search } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Minus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import Layout from '@/components/Layout';
 import { fetchPatients } from '@/redux/actions/patientActions';
@@ -9,21 +9,17 @@ import { createBilling } from '@/redux/actions/billingActions';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 
-const BillingForm = () => {
+const CreateBillingPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-
+  
   // Redux state
   const { patients } = useSelector((state) => state.patients);
   const { users } = useSelector((state) => state.users);
   const { products, status } = useSelector((state) => state.products);
-
-  // Debug logs for products data
-  useEffect(() => {
-    console.log('Products from Redux:', products);
-    console.log('Redux Status:', status);
-  }, [products, status]);
-
+  const { user: currentUser } = useSelector((state) => state.auth || {});
+  const { loading: billingLoading } = useSelector((state) => state.billing);
+  
   // Component state
   const [isLoading, setIsLoading] = useState(true);
   const [formState, setFormState] = useState({
@@ -31,36 +27,41 @@ const BillingForm = () => {
     selectedPatient: null,
     selectedDoctor: null,
     showPatientSuggestions: false,
-    remarks: '',
     discount: { type: 'percent', value: 0 },
-    payment: { type: '', paid: 0 },
-    consultationChecked: false,
-    createdBy: users?._id
+    payment: { 
+      type: '', 
+      paid: 0,
+      cardNumber: '',
+      utrNumber: ''
+    },
+    consultationChecked: false
   });
 
   const [billingItems, setBillingItems] = useState([
     { id: 1, name: '', code: '', category: '', price: 0, quantity: 1, tax: 0, total: 0 }
   ]);
-
+  
   // Product search state
   const [searchQueries, setSearchQueries] = useState({});
   const [activeSearchIndex, setActiveSearchIndex] = useState(null);
-
+  
   // Filter doctors from users
-  const doctors = users.filter(user => user.role === 'Doctor');
+  const doctors = users?.filter(user => user.role === 'Doctor') || [];
 
-  // Fetch initial data
+  // Fetch initial data with proper error handling
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         await Promise.all([
           dispatch(fetchProducts()),
           dispatch(fetchPatients()),
           dispatch(fetchUsers())
         ]);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
+        toast.error('Failed to load initial data. Please refresh the page.');
+      } finally {
         setIsLoading(false);
       }
     };
@@ -74,22 +75,41 @@ const BillingForm = () => {
     }
   }, [status]);
 
-  // Filter functions
-  const getFilteredProducts = (searchQuery) => {
+  // Filter functions with null checks
+  const getFilteredProducts = useCallback((searchQuery) => {
     if (!searchQuery || !products) return [];
-    console.log('Searching products with query:', searchQuery);
     return products.filter(product =>
       product.productname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.productcode?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
+  }, [products]);
 
-  const getFilteredPatients = (query) => {
+  const getFilteredPatients = useCallback((query) => {
     if (!query || !patients) return [];
     return patients.filter(patient =>
       `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
       patient.patientId.toLowerCase().includes(query.toLowerCase())
     );
+  }, [patients]);
+
+  // Calculate totals function
+  const calculateTotals = (items = billingItems) => {
+    const subtotal = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    const totalTax = items.reduce((sum, item) => sum + parseFloat(item.tax || 0), 0);
+    let discountAmount = 0;
+
+    if (formState.discount.type === 'percent') {
+      discountAmount = (subtotal * parseFloat(formState.discount.value || 0)) / 100;
+    } else {
+      discountAmount = parseFloat(formState.discount.value || 0);
+    }
+
+    const grandTotal = Math.max(0, subtotal - discountAmount);
+    const paidAmount = parseFloat(formState.payment.paid || 0);
+    const balance = grandTotal - paidAmount;
+    const dueAmount = Math.max(0, balance);
+    
+    return { subtotal, totalTax, discountAmount, grandTotal, balance, dueAmount };
   };
 
   // Handlers
@@ -112,7 +132,6 @@ const BillingForm = () => {
   };
 
   const handleProductSearch = (index, value) => {
-    console.log('Search value:', value);
     setSearchQueries(prev => ({
       ...prev,
       [index]: value
@@ -128,17 +147,31 @@ const BillingForm = () => {
   };
 
   const handleProductSelect = (product, index) => {
-    console.log('Selected product:', product);
+    // Validate that the product has all required fields
+    if (!product.productname || !product.productcode || !product.price) {
+      toast.error('Invalid product data. Please select a different product.');
+      return;
+    }
+  
+    const isDuplicate = billingItems.some(
+      (item, idx) => idx !== index && item.code === product.productcode
+    );
+  
+    if (isDuplicate) {
+      toast.error('This product is already added to the bill');
+      return;
+    }
+  
     const updatedItems = [...billingItems];
     updatedItems[index] = {
       ...updatedItems[index],
       name: product.productname,
       code: product.productcode,
-      category: product.servicetype,
-      price: parseFloat(product.price),
-      tax: parseFloat(product.tax),
+      category: product.category?.categoryName || 'Uncategorized',
+      price: parseFloat(product.price) || 0,
+      tax: parseFloat(product.tax) || 0,
       quantity: 1,
-      total: parseFloat(product.price) + parseFloat(product.tax)
+      total: (parseFloat(product.price) || 0) + (parseFloat(product.tax) || 0)
     };
     setBillingItems(updatedItems);
     
@@ -147,14 +180,24 @@ const BillingForm = () => {
       [index]: product.productname
     }));
     setActiveSearchIndex(null);
+  
+    // Auto-update payment amount if payment type is selected
+    if (formState.payment.type) {
+      const totals = calculateTotals(updatedItems);
+      setFormState(prev => ({
+        ...prev,
+        payment: { ...prev.payment, paid: totals.grandTotal }
+      }));
+    }
   };
-
+  
   const handleConsultationToggle = () => {
     if (formState.selectedDoctor?.consultationCharges) {
       setFormState(prev => ({ ...prev, consultationChecked: !prev.consultationChecked }));
       
+      let newBillingItems;
       if (!formState.consultationChecked) {
-        setBillingItems([
+        newBillingItems = [
           ...billingItems,
           {
             id: Date.now(),
@@ -166,9 +209,20 @@ const BillingForm = () => {
             tax: 0,
             total: formState.selectedDoctor.consultationCharges
           }
-        ]);
+        ];
       } else {
-        setBillingItems(billingItems.filter(item => item.code !== 'CONSULT'));
+        newBillingItems = billingItems.filter(item => item.code !== 'CONSULT');
+      }
+      
+      setBillingItems(newBillingItems);
+
+      // Auto-update payment amount if payment type is selected
+      if (formState.payment.type) {
+        const totals = calculateTotals(newBillingItems);
+        setFormState(prev => ({
+          ...prev,
+          payment: { ...prev.payment, paid: totals.grandTotal }
+        }));
       }
     }
   };
@@ -182,101 +236,194 @@ const BillingForm = () => {
 
     if (field === 'quantity') {
       const price = parseFloat(updatedItems[index].price);
-      const quantity = parseInt(value);
+      const quantity = parseInt(value) || 1;
       const tax = parseFloat(updatedItems[index].tax);
       updatedItems[index].total = (price * quantity) + tax;
     }
 
     setBillingItems(updatedItems);
+    
+    // Auto-update payment amount if payment type is selected
+    if (formState.payment.type) {
+      const totals = calculateTotals(updatedItems);
+      setFormState(prev => ({
+        ...prev,
+        payment: { ...prev.payment, paid: totals.grandTotal }
+      }));
+    }
   };
 
-  const handlePaidAmountChange = (e) => {
-    const paidAmount = parseFloat(e.target.value) || 0;
-    const grandTotal = calculateTotals().grandTotal;
+  const validateCardNumber = (number) => {
+    return /^\d{4}$/.test(number);
+  };
+
+  const validateUTRNumber = (number) => {
+    return /^[a-zA-Z0-9]{4}$/.test(number);
+  };
+
+  // Updated handlePaymentDetailsChange with paid amount validation
+  const handlePaymentDetailsChange = (e) => {
+    const { name, value } = e.target;
     
-    let automaticRemarks = 'pending';
-    if (paidAmount === 0) {
-      automaticRemarks = 'pending';
-    } else if (paidAmount >= grandTotal) {
-      automaticRemarks = 'paid';
-    } else {
-      automaticRemarks = 'partial';
+    if (name === 'cardNumber' && !/^\d*$/.test(value)) {
+      return;
+    }
+
+    let newPayment = {
+      ...formState.payment,
+      [name]: value
+    };
+
+    // Add validation for paid amount
+    if (name === 'paid') {
+      const inputValue = parseFloat(value) || 0;
+      const totals = calculateTotals(billingItems);
+      
+      // Allow any positive amount (including overpayment)
+      if (inputValue < 0) {
+        newPayment.paid = 0;
+        toast.warning('Paid amount cannot be negative');
+      } else {
+        newPayment.paid = inputValue;
+      }
+    }
+
+    // Auto-set paid amount to grand total when payment type is selected
+    if (name === 'type' && value) {
+      const totals = calculateTotals(billingItems);
+      newPayment.paid = totals.grandTotal;
     }
 
     setFormState(prev => ({
       ...prev,
-      payment: { ...prev.payment, paid: e.target.value },
-      remarks: automaticRemarks
+      payment: newPayment
     }));
   };
 
+  // Simple discount change handler
+  const handleDiscountChange = (field, value) => {
+    setFormState(prev => ({
+      ...prev,
+      discount: {
+        ...prev.discount,
+        [field]: value
+      }
+    }));
+    
+    // Auto-update payment amount if payment type is selected
+    if (formState.payment.type) {
+      setTimeout(() => {
+        const totals = calculateTotals(billingItems);
+        setFormState(prev => ({
+          ...prev,
+          payment: { ...prev.payment, paid: totals.grandTotal }
+        }));
+      }, 0);
+    }
+  };
+
   const addBillingItem = () => {
-    setBillingItems([
+    const newItems = [
       ...billingItems,
       { id: Date.now(), name: '', code: '', category: '', price: 0, quantity: 1, tax: 0, total: 0 }
-    ]);
+    ];
+    setBillingItems(newItems);
   };
 
   const removeBillingItem = (index) => {
     if (billingItems.length > 1) {
-      setBillingItems(billingItems.filter((_, i) => i !== index));
+      const newItems = billingItems.filter((_, i) => i !== index);
+      setBillingItems(newItems);
+      
+      // Reindex search queries
       setSearchQueries(prev => {
-        const newQueries = { ...prev };
-        delete newQueries[index];
+        const newQueries = {};
+        Object.keys(prev).forEach(key => {
+          const keyIndex = parseInt(key);
+          if (keyIndex < index) {
+            newQueries[key] = prev[key];
+          } else if (keyIndex > index) {
+            newQueries[keyIndex - 1] = prev[key];
+          }
+        });
         return newQueries;
       });
+
+      // Auto-update payment amount if payment type is selected
+      if (formState.payment.type) {
+        const totals = calculateTotals(newItems);
+        setFormState(prev => ({
+          ...prev,
+          payment: { ...prev.payment, paid: totals.grandTotal }
+        }));
+      }
     }
-  };
-
-  const calculateTotals = () => {
-    const subtotal = billingItems.reduce((sum, item) => sum + item.total, 0);
-    const totalTax = billingItems.reduce((sum, item) => sum + parseFloat(item.tax || 0), 0);
-    let discountAmount = 0;
-
-    if (formState.discount.type === 'percent') {
-      discountAmount = (subtotal * formState.discount.value) / 100;
-    } else {
-      discountAmount = parseFloat(formState.discount.value || 0);
-    }
-
-    const grandTotal = subtotal - discountAmount;
-    const balance = grandTotal - parseFloat(formState.payment.paid || 0);
-
-    return { subtotal, totalTax, discountAmount, grandTotal, balance };
   };
 
   const handleSaveBill = () => {
+    // Validation
     if (!formState.selectedPatient || !formState.selectedDoctor) {
       toast.error('Please select both patient and doctor');
       return;
     }
-
-    if (!billingItems.some(item => item.name)) {
+  
+    const hasEmptyItems = billingItems.some(item => !item.name || !item.code);
+    if (hasEmptyItems) {
+      toast.error('Please fill in all billing items or remove empty ones');
+      return;
+    }
+  
+    if (billingItems.length === 0) {
       toast.error('Please add at least one billing item');
       return;
     }
-
+  
     if (!formState.payment.type) {
       toast.error('Please select a payment type');
       return;
     }
-
+  
+    if (formState.payment.type === 'card' && !validateCardNumber(formState.payment.cardNumber)) {
+      toast.error('Please enter a valid 4-digit card number');
+      return;
+    }
+  
+    if (formState.payment.type === 'upi' && !validateUTRNumber(formState.payment.utrNumber)) {
+      toast.error('Please enter a valid 4-character UTR number');
+      return;
+    }
+  
     const totals = calculateTotals();
+    
+    // Determine status based on payment amount
+    let status = 'active';
+    if (totals.dueAmount <= 0) {
+      status = 'paid';
+    } else if (formState.payment.paid > 0) {
+      status = 'partial';
+    }
+    
     const billingData = {
       patientId: formState.selectedPatient._id,
       doctorId: formState.selectedDoctor._id,
       billingItems,
       discount: formState.discount,
       payment: formState.payment,
-      remarks: formState.remarks,
-      totals,
-      createdBy: users?._id
+      totals: {
+        ...totals,
+        balance: totals.dueAmount,
+        dueAmount: totals.dueAmount
+      }
     };
-
+  
     dispatch(createBilling(billingData))
       .unwrap()
-      .then(() => {
+      .then((response) => {
         toast.success('Bill created successfully');
+        const billNumber = response.billing?.billNumber;
+        if (billNumber) {
+          toast.info(`Bill Number: ${billNumber}`);
+        }
         router.push('/billing');
       })
       .catch((error) => {
@@ -290,10 +437,9 @@ const BillingForm = () => {
       selectedPatient: null,
       selectedDoctor: null,
       showPatientSuggestions: false,
-      remarks: '',
       discount: { type: 'percent', value: 0 },
-      payment: { type: '', paid: 0 },
-      consultationChecked: false,
+      payment: { type: '', paid: 0, cardNumber: '', utrNumber: '' },
+      consultationChecked: false
     });
     setBillingItems([
       { id: 1, name: '', code: '', category: '', price: 0, quantity: 1, tax: 0, total: 0 }
@@ -316,17 +462,16 @@ const BillingForm = () => {
 
   return (
     <Layout>
-      <div className="">
-        <div className="">
-          <h2 className="text-sm">Create Bill</h2>
-          <p className="text-xs">Create a new bill for patient services</p>
-
-          {/* Patient and Doctor Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="container mx-auto px-4 py-4">
+        <div className="bg-white rounded-lg">
+          <h2 className="text-sm font-semibold mb-2">Create Bill</h2>
+          <p className="text-gray-600 mb-6 text-xs">Create a new bill for patient services</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-xs">
             {/* Patient Selection */}
             <div className="form-control">
               <label className="label">
-                <span className="text-xs">Patient</span>
+                <span className="text-sm font-medium">Patient *</span>
               </label>
               <div className="relative">
                 <input
@@ -338,23 +483,20 @@ const BillingForm = () => {
                     showPatientSuggestions: true
                   }))}
                   placeholder="Search patient..."
-                  className="w-full p-2 border text-xs rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border rounded-md"
+                  required
                 />
                 
                 {formState.showPatientSuggestions && formState.patientQuery && (
-                  <ul className="menu bg-base-100 w-full p-2 rounded-box shadow absolute z-50 mt-1 max-h-60 overflow-auto">
+                  <ul className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
                     {getFilteredPatients(formState.patientQuery).map(patient => (
-                      <li key={patient._id}>
-                        <a onClick={() => handlePatientSelect(patient)}>
-                          <div>
-                            <div className="text-xs">
-                              {patient.firstName} {patient.lastName}
-                            </div>
-                            <div className="text-sm opacity-70">
-                              ID: {patient.patientId}
-                            </div>
-                          </div>
-                        </a>
+                      <li
+                        key={patient._id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handlePatientSelect(patient)}
+                      >
+                        <div className="text-sm">{patient.firstName} {patient.lastName}</div>
+                        <div className="text-xs text-gray-600">ID: {patient.patientId}</div>
                       </li>
                     ))}
                   </ul>
@@ -365,12 +507,13 @@ const BillingForm = () => {
             {/* Doctor Selection */}
             <div className="form-control">
               <label className="label">
-                <span className="text-xs">Doctor</span>
+                <span className="text-sm font-medium">Doctor *</span>
               </label>
               <select
-                className="w-full p-2 text-xs border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 border rounded-md"
                 onChange={handleDoctorSelect}
                 value={formState.selectedDoctor?._id || ''}
+                required
               >
                 <option value="">Select doctor</option>
                 {doctors.map((doctor) => (
@@ -382,16 +525,22 @@ const BillingForm = () => {
             </div>
 
             {/* Consultation Checkbox */}
-            <div className="form-control ">
-              <div className="flex justify-center items-center p-2 gap-2">
-                <span className="text-xs">Consultation</span>
+            <div className="form-control flex items-center justify-center">
+              <label className="cursor-pointer flex items-center gap-2">
+                <span className="text-sm font-medium">Add Consultation</span>
                 <input
                   type="checkbox"
                   checked={formState.consultationChecked}
                   onChange={handleConsultationToggle}
-                  className="checkbox "
+                  disabled={!formState.selectedDoctor?.consultationCharges}
+                  className="checkbox"
                 />
-              </div>
+              </label>
+              {formState.selectedDoctor?.consultationCharges && (
+                <span className="text-xs text-gray-500 mt-1">
+                  ₹{formState.selectedDoctor.consultationCharges}
+                </span>
+              )}
             </div>
           </div>
 
@@ -400,7 +549,7 @@ const BillingForm = () => {
             <table className="table my-4">
               <thead>
                 <tr className='text-xs'>
-                  <th>Name</th>
+                  <th>Service/Product Name *</th>
                   <th>Code</th>
                   <th>Category</th>
                   <th>Price (₹)</th>
@@ -414,26 +563,27 @@ const BillingForm = () => {
                 {billingItems.map((item, index) => (
                   <tr key={item.id} className='text-xs'>
                     <td className="relative">
-                      <input
+                      <input 
+                        required
                         type="text"
                         value={searchQueries[index] || item.name}
                         onChange={(e) => handleProductSearch(index, e.target.value)}
                         onFocus={() => setActiveSearchIndex(index)}
-                        placeholder="Search product..."
+                        placeholder="Search product/service..."
                         className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                       {activeSearchIndex === index && searchQueries[index] && getFilteredProducts(searchQueries[index]).length > 0 && (
-                        <ul className="menu bg-base-200 w-[200px] p-2 rounded-box shadow absolute z-50 mt-1 max-h-60 overflow-auto">
+                        <ul className="menu bg-base-200 w-full min-w-[300px] max-w-[500px] p-2 rounded-box shadow absolute z-50 mt-1 max-h-60 overflow-auto">
                           {getFilteredProducts(searchQueries[index]).map((product) => (
                             <li key={product._id}>
                               <a 
                                 onClick={() => handleProductSelect(product, index)}
-                                className="hover: p-2 cursor-pointer"
+                                className="hover:bg-base-300 p-2 cursor-pointer"
                               >
                                 <div>
-                                  <div className="text-xs">{product.productname}</div>
-                                  <div className="text-sm opacity-70">
-                                  Price: ₹{product.price}
+                                  <div className="text-xs font-semibold">{product.productname}</div>
+                                  <div className="text-xs opacity-70">
+                                    Code: {product.productcode} | Price: ₹{product.price}
                                   </div>
                                 </div>
                               </a>
@@ -447,7 +597,7 @@ const BillingForm = () => {
                         type="text"
                         value={item.code}
                         readOnly
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border rounded-md bg-gray-50"
                       />
                     </td>
                     <td>
@@ -455,7 +605,7 @@ const BillingForm = () => {
                         type="text"
                         value={item.category}
                         readOnly
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border rounded-md bg-gray-50"
                       />
                     </td>
                     <td>
@@ -463,7 +613,7 @@ const BillingForm = () => {
                         type="number"
                         value={item.price}
                         readOnly
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border rounded-md bg-gray-50"
                       />
                     </td>
                     <td>
@@ -472,7 +622,7 @@ const BillingForm = () => {
                         value={item.quantity}
                         onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                         min="1"
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border rounded-md"
                       />
                     </td>
                     <td>
@@ -480,17 +630,27 @@ const BillingForm = () => {
                         type="number"
                         value={item.tax}
                         readOnly
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border rounded-md bg-gray-50"
                       />
                     </td>
-                    <td>₹{item.total.toFixed(2)}</td>
+                    <td>₹{(item.total || 0).toFixed(2)}</td>
                     <td>
                       <div className="flex space-x-2">
-                        <button onClick={addBillingItem} className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600">
+                        <button 
+                          type="button"
+                          onClick={addBillingItem} 
+                          className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600"
+                          title="Add item"
+                        >
                           <Plus className="h-4 w-4" />
                         </button>
                         {billingItems.length > 1 && (
-                          <button onClick={() => removeBillingItem(index)} className="p-1 text-white bg-red-500 rounded hover:bg-red-600">
+                          <button 
+                            type="button"
+                            onClick={() => removeBillingItem(index)} 
+                            className="p-1 text-white bg-red-500 rounded hover:bg-red-600"
+                            title="Remove item"
+                          >
                             <Minus className="h-4 w-4" />
                           </button>
                         )}
@@ -502,131 +662,153 @@ const BillingForm = () => {
             </table>
           </div>
 
-          {/* Discount Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Discount and Payment Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-xs">
+            {/* Discount Section */}
             <div className="form-control">
               <label className="label">
-                <span className="text-xs">Discount Type</span>
+                <span className="text-sm font-medium">Discount</span>
               </label>
               <div className="flex items-center space-x-4">
-                <label className="label cursor-pointer">
+                <label className="inline-flex items-center">
                   <input
                     type="radio"
                     name="discountType"
-                    className="radio"
+                    className="form-radio"
                     checked={formState.discount.type === 'percent'}
-                    onChange={() => setFormState(prev => ({
-                      ...prev,
-                      discount: { ...prev.discount, type: 'percent' }
-                    }))}
+                    onChange={() => handleDiscountChange('type', 'percent')}
                   />
-                  <span className="ml-2 text-xs">Percentage (%)</span>
+                  <span className="ml-2">Percentage (%)</span>
                 </label>
-                <label className="label cursor-pointer">
+                <label className="inline-flex items-center">
                   <input
                     type="radio"
                     name="discountType"
-                    className="radio"
+                    className="form-radio"
                     checked={formState.discount.type === 'amount'}
-                    onChange={() => setFormState(prev => ({
-                      ...prev,
-                      discount: { ...prev.discount, type: 'amount' }
-                    }))}
+                    onChange={() => handleDiscountChange('type', 'amount')}
                   />
-                  <span className="ml-2 text-xs">Amount (₹)</span>
+                  <span className="ml-2">Amount (₹)</span>
                 </label>
                 <input
                   type="number"
                   value={formState.discount.value}
-                  onChange={(e) => setFormState(prev => ({
-                    ...prev,
-                    discount: { ...prev.discount, value: e.target.value }
-                  }))}
-                  className="input input-bordered text-xs input-sm w-24"
+                  onChange={(e) => handleDiscountChange('value', e.target.value)}
+                  className="w-24 p-2 border rounded-md"
                   min="0"
+                  step="0.01"
                 />
               </div>
             </div>
-          </div>
 
-          {/* Payment and Remarks Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Payment Type */}
+            {/* Payment Section */}
             <div className="form-control">
               <label className="label">
-                <span className="text-xs">Payment Type</span>
+                <span className="text-sm font-medium">Payment Details *</span>
               </label>
-              <select
-                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formState.payment.type}
-                onChange={(e) => setFormState(prev => ({
-                  ...prev,
-                  payment: { ...prev.payment, type: e.target.value }
-                }))}
-              >
-                <option value="">Select Payment Type</option>
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-                <option value="upi">UPI</option>
-              </select>
-            </div>
+              <div className="space-y-2">
+                <select
+                  className="w-full p-2 border rounded-md"
+                  value={formState.payment.type}
+                  onChange={(e) => handlePaymentDetailsChange({ target: { name: 'type', value: e.target.value } })}
+                  required
+                >
+                  <option value="">Select Payment Type</option>
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="upi">UPI</option>
+                  <option value="NEFT">NEFT</option>
+                </select>
 
-            {/* Remarks - Now Read Only */}
-            <div className="form-control">
-              <label className="label">
-                <span className="text-xs">Remarks</span>
-              </label>
-              <input
-                type="text"
-                value={formState.remarks}
-                readOnly
-                className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+                {formState.payment.type === 'card' && (
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    value={formState.payment.cardNumber}
+                    onChange={handlePaymentDetailsChange}
+                    placeholder="Last 4 digits of card"
+                    maxLength="4"
+                    className="w-full p-2 border rounded-md"
+                    required
+                  />
+                )}
+
+                {formState.payment.type === 'upi' && (
+                  <input
+                    type="text"
+                    name="utrNumber"
+                    value={formState.payment.utrNumber}
+                    onChange={handlePaymentDetailsChange}
+                    placeholder="4-character UTR number"
+                    maxLength="4"
+                    className="w-full p-2 border rounded-md"
+                    required
+                  />
+                )}
+              </div>
             </div>
           </div>
 
           {/* Totals Section */}
-          <div className=" p-4 rounded-lg mb-8 text-xs">
+          <div className="bg-gray-50 p-4 rounded-lg mb-8 text-xs">
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-right text-xs">Subtotal:</div>
+              <div className="text-right font-medium">Subtotal:</div>
               <div>₹{totals.subtotal.toFixed(2)}</div>
               
-              <div className="text-right text-xs">Total Tax:</div>
+              <div className="text-right font-medium">Total Tax:</div>
               <div>₹{totals.totalTax.toFixed(2)}</div>
               
-              <div className="text-right text-xs">Discount:</div>
+              <div className="text-right font-medium">Discount:</div>
               <div>₹{totals.discountAmount.toFixed(2)}</div>
               
-              <div className="text-right text-xs">Grand Total:</div>
-              <div>₹{totals.grandTotal.toFixed(2)}</div>
+              <div className="text-right font-bold text-lg">Grand Total:</div>
+              <div className="font-bold text-lg">₹{totals.grandTotal.toFixed(2)}</div>
               
-              <div className="text-right text-xs">Paid Amount:</div>
+              <div className="text-right font-medium">Paid Amount:</div>
               <div>
                 <input
                   type="number"
                   value={formState.payment.paid}
-                  onChange={handlePaidAmountChange}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => handlePaymentDetailsChange({ target: { name: 'paid', value: e.target.value } })}
                   min="0"
+                  step="0.01"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
               
-              <div className="text-right text-xs">Balance:</div>
-              <div>₹{totals.balance.toFixed(2)}</div>
+              <div className="text-right font-medium">Due Amount:</div>
+              <div className={`font-medium ${
+                totals.dueAmount > 0 ? 'text-warning' : 'text-success'
+              }`}>
+                ₹{totals.dueAmount.toFixed(2)}
+              </div>
+              
+              <div className="text-right font-medium">Status:</div>
+              <div>
+                <span className={`badge ${
+                  totals.dueAmount <= 0 ? 'badge-success' : 
+                  formState.payment.paid > 0 ? 'badge-warning' : 'badge-info'
+                }`}>
+                  {totals.dueAmount <= 0 ? 'Paid' : 
+                   formState.payment.paid > 0 ? 'Partial' : 'Due'}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end space-x-4 text-xs">
             <button
               onClick={handleSaveBill}
-              className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-500"
+              disabled={billingLoading}
+              className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-500 disabled:opacity-50"
             >
-              Save Bill
+              {billingLoading ? 'Creating...' : 'Create Bill'}
             </button>
             <button
               onClick={resetForm}
-              className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              disabled={billingLoading}
+              className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
             >
               Reset
             </button>
@@ -637,4 +819,4 @@ const BillingForm = () => {
   );
 };
 
-export default BillingForm;
+export default CreateBillingPage;

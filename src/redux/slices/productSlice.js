@@ -1,6 +1,6 @@
 // productSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../actions/productActions';
+import { fetchProducts, createProduct, updateProduct, deleteProduct, getProductById } from '../actions/productActions';
 
 const productSlice = createSlice({
     name: 'products',
@@ -24,6 +24,7 @@ const productSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
+
             // Create Product
             .addCase(createProduct.pending, (state) => {
                 state.status = 'loading';
@@ -36,6 +37,18 @@ const productSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
+            // Get Product by ID
+            .addCase(getProductById.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getProductById.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.products = action.payload; // Changed from items to product
+            })
+            .addCase(getProductById.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload;
+            })
             // Update Product
             .addCase(updateProduct.pending, (state) => {
                 state.status = 'loading';
@@ -45,6 +58,7 @@ const productSlice = createSlice({
                 const index = state.products.findIndex((product) => product._id === action.payload._id); // Changed from items to products
                 if (index !== -1) state.products[index] = action.payload;
             })
+
             .addCase(updateProduct.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;

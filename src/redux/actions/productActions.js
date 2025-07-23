@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async (_, { rejectWithValue }) => {
     try {
         const response = await axios.get(`${baseURL}/api/product`);
-        console.log(response.data)
+        
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -41,6 +41,17 @@ export const deleteProduct = createAsyncThunk('products/deleteProduct', async (i
         // await axios.delete(`$${baseURL}/api/product/${id}`);
         // return id;
         toast("Delete option disabled!!! 😲", )
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+});
+
+export const getProductById = createAsyncThunk('products/getProductById', async (
+    id,
+    { rejectWithValue }) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/product/${id}`);
+        return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
     }

@@ -7,6 +7,7 @@ import { fetchBillingById, updateBilling } from '@/redux/actions/billingActions'
 import { fetchPatients } from '@/redux/actions/patientActions';
 import { fetchUsers } from '@/redux/actions/userActions';
 import { fetchProducts } from '@/redux/actions/productActions';
+import { toast } from 'react-toastify';
 
 const UpdateBilling = () => {
   const dispatch = useDispatch();
@@ -44,16 +45,44 @@ const UpdateBilling = () => {
     }
   }, [id, dispatch]);
 
-  useEffect(() => {
-    if (billing) {
-      setBillingItems(billing.billingItems || []);
-      setDiscount(billing.discount || { type: 'percent', value: 0 });
-      setPayment(billing.payment || { type: '', paid: 0 });
-      setRemarks(billing.remarks || '');
-      if (billing.patientId) setSelectedPatient(billing.patientId);
-      if (billing.doctorId) setSelectedDoctor(billing.doctorId);
+
+
+useEffect(() => {
+  if (billing) {
+    setBillingItems(billing.billingItems || []);
+    setDiscount(billing.discount || { type: 'percent', value: 0 });
+    setPayment(billing.payment || { type: '', paid: 0 });
+    setRemarks(billing.remarks || '');
+    if (billing.patientId) setSelectedPatient(billing.patientId);
+    if (billing.doctorId) setSelectedDoctor(billing.doctorId);
+  }
+}, [billing]);
+
+useEffect(() => {
+  if (billingItems.length > 0) {
+    const totals = calculateTotals();
+
+    if (payment.paid > totals.grandTotal) {
+      toast.error('Paid amount cannot exceed the grand total');
+      return;
     }
-  }, [billing]);
+
+    if (payment.paid < 0) {
+      toast.error('Paid amount cannot be negative');
+      return;
+    }
+    
+    if (Number(payment.paid) >= totals.grandTotal && totals.grandTotal > 0) {
+      setRemarks('paid');
+    } else if (Number(payment.paid) === 0) {
+      setRemarks('pending');
+    } else if (totals.balance > 0) {
+      setRemarks('partial');
+    }
+
+    
+  }
+}, [payment.paid, billingItems, discount]);
 
   const handlePatientChange = (e) => {
     const value = e.target.value;
@@ -98,25 +127,58 @@ const UpdateBilling = () => {
   };
 
   const handleProductSelect = (product, index) => {
+    // Check if product already exists in billing items
+    const isDuplicate = billingItems.some(
+      (item, idx) => idx !== index && item.code === product.productcode
+    );
+  
+    if (isDuplicate) {
+      toast.error('This product is already added to the bill');
+      return;
+    }
+  
     const updatedItems = [...billingItems];
     updatedItems[index] = {
       ...updatedItems[index],
       name: product.productname,
       code: product.productcode,
-      category: product.servicetype,
+      category: product.category.categoryName,
       price: parseFloat(product.price),
       tax: parseFloat(product.tax),
       quantity: 1,
       total: parseFloat(product.price) + parseFloat(product.tax)
     };
     setBillingItems(updatedItems);
-    
+  
     setSearchQueries(prev => ({
       ...prev,
       [index]: product.productname
     }));
     setActiveSearchIndex(null);
   };
+
+  // const handleProductSelect = (product, index) => {
+
+
+  //   const updatedItems = [...billingItems];
+  //   updatedItems[index] = {
+  //     ...updatedItems[index],
+  //     name: product.productname,
+  //     code: product.productcode,
+  //     category: product.category.categoryName,
+  //     price: parseFloat(product.price),
+  //     tax: parseFloat(product.tax),
+  //     quantity: 1,
+  //     total: parseFloat(product.price) + parseFloat(product.tax)
+  //   };
+  //   setBillingItems(updatedItems);
+
+  //   setSearchQueries(prev => ({
+  //     ...prev,
+  //     [index]: product.productname
+  //   }));
+  //   setActiveSearchIndex(null);
+  // };
 
   const handleConsultationToggle = () => {
     if (selectedDoctor && selectedDoctor.consultationCharges) {
@@ -198,7 +260,8 @@ const UpdateBilling = () => {
         discount,
         payment,
         remarks,
-        totals
+        totals,
+        createdBy: users?._id
       };
       dispatch(updateBilling({ id, data: billingData })).then(() => router.push('/billing'));
     } else {
@@ -207,21 +270,25 @@ const UpdateBilling = () => {
   };
 
   if (loading) return <p>Loading...</p>;
+  
 
   const totals = calculateTotals();
+
+
+
 
   return (
     <Layout>
       <div className="w-full max-w-6xl mx-auto bg-white rounded-lg p-6">
         <h1 className="text-lg font-bold mb-6">Update Bill</h1>
-        
+
         {/* Patient and Doctor Selection */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="relative text-xs">
             <label className="block text-xs font-medium mb-2">Patient</label>
             <input
               type="text"
-              value={`${billing?.patientId.firstName +' '+ billing?.patientId.lastName}`}
+              value={`${billing?.patientId.firstName + ' ' + billing?.patientId.lastName}`}
               onChange={handlePatientChange}
               placeholder="Search patient..."
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -355,11 +422,11 @@ const UpdateBilling = () => {
                     <td className="p-2 border text-xs text-right">₹{item.total}</td>
                     <td className="p-2 border">
                       <div className="flex justify-center space-x-2">
-                        <button onClick={addBillingItem} className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600">
+                        <button hidden onClick={addBillingItem} className="p-1 text-white bg-blue-500 rounded hover:bg-blue-600">
                           <Plus size={16} />
                         </button>
                         {billingItems.length > 1 && (
-                          <button onClick={() => removeBillingItem(index)} className="p-1 text-white bg-red-500 rounded hover:bg-red-600">
+                          <button hidden onClick={() => removeBillingItem(index)} className="p-1 text-white bg-red-500 rounded hover:bg-red-600">
                             <Minus size={16} />
                           </button>
                         )}
@@ -369,7 +436,7 @@ const UpdateBilling = () => {
                 ))}
               </tbody>
             </table>
-            </div>
+          </div>
         </div>
 
         {/* Discount and Payment Details */}
@@ -423,14 +490,15 @@ const UpdateBilling = () => {
             <h3 className="text-sm font-medium mb-4">Remarks</h3>
             <select
               value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              disabled // Add this to prevent manual changes
+              className="w-full text-xs p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50" // Added bg-gray-50 to show it's disabled
             >
               <option value="">Select Remarks</option>
               <option value="paid">Paid</option>
               <option value="pending">Payment Pending</option>
               <option value="partial">Partially Paid</option>
             </select>
+
           </div>
         </div>
 

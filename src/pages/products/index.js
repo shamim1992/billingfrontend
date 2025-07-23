@@ -5,6 +5,7 @@ import { fetchProducts, deleteProduct } from '@/redux/actions/productActions';
 import { fetchCategories } from '@/redux/actions/categoryActions';
 import Layout from '@/components/Layout';
 import { Search, PlusCircle, Eye, Edit, Trash2, Layers3 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const ProductList = () => {
   const dispatch = useDispatch();
@@ -22,7 +23,7 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(10);
+  const [productsPerPage] = useState(20);
   const [isLoading, setIsLoading] = useState(true);
 
 
@@ -55,7 +56,7 @@ const ProductList = () => {
     try {
       await dispatch(deleteProduct(id));
       setCurrentPage(1);
-      toast.success('Product deleted successfully');
+      // toast.success('Product deleted successfully');
     } catch (error) {
       toast.error('Error deleting product');
     }
@@ -175,13 +176,13 @@ const ProductList = () => {
                       >
                         <Eye size={16} />
                       </Link>
-                      <Link 
+                      {/* <Link 
                         href={`/products/edit/${product._id}`} 
                         className="tooltip" 
                         data-tip="Edit"
                       >
                         <Edit size={16} />
-                      </Link>
+                      </Link> */}
                       <button 
                         className="text-red-500 tooltip" 
                         data-tip="Delete"

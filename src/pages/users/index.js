@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUsers } from '../../redux/actions/userActions';
 import Layout from '../../components/Layout';
-import { Search, UserPlus, ChevronRight, Phone, Mail, User } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Phone, Mail, User, Pencil } from 'lucide-react';
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -69,6 +69,11 @@ const UserList = () => {
             </span>
           </Link>
           <div className="flex items-center gap-2">
+          <Link href={`/users/edit/${user._id}`}>
+        <button className="p-2 hover:bg-gray-50 rounded-md">
+          <Pencil size={16} className="text-gray-500" />
+        </button>
+      </Link>
             <button className="p-2 hover:bg-gray-50 rounded-md">
               <Phone size={16} className="text-gray-500" />
             </button>

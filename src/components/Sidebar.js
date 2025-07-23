@@ -12,7 +12,7 @@ const Sidebar = ({ isOpen }) => {
     { name: 'Patients', icon: Users, path: '/patients' },
     { name: 'Users', icon: Users, path: '/users' },
     { name: 'Departments', icon: Component, path: '/departments' },
-    { name: 'Appointments', icon: Calendar, path: '/appointments' },
+    // { name: 'Appointments', icon: Calendar, path: '/appointments' },
     { name: 'Billing', icon: Receipt, path: '/billing' },
     { name: 'Reports', icon: PieChart, path: '/reports' },
     { name: 'Products', icon: Calendar, path: '/products' },
