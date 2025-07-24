@@ -95,7 +95,7 @@ const PrintBillComponent = ({ bill }) => {
               <p className="font-bold mb-2">Bill Details:</p>
               <p className="mb-1"><span className="font-bold">Bill Number:</span> {bill.billNumber || bill._id}</p>
               <p className="mb-1"><span className="font-bold">Date:</span> {new Date(bill.createdAt).toLocaleDateString()}</p>
-              <p className="mb-1"><span className="font-bold">Doctor:</span> {bill.doctorId.name}</p>
+              <p className="mb-1"><span className="font-bold">Doctor:</span> {bill?.doctorId?.name}</p>
               <p className="mb-1"><span className="font-bold">Payment:</span> {bill.payment?.type?.toUpperCase()}</p>
             </div>
           </div>

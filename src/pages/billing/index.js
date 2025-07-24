@@ -248,10 +248,6 @@ const BillingTable = () => {
     return buttons;
   }, [currentPage, totalPages]);
 
-  const handleMigrate = async () => {
-    dispatch(migrateBillNumbers());
-  };
-
 
   return (
     <Layout>
@@ -334,16 +330,11 @@ const BillingTable = () => {
                   </select>
                   <Link
                     href="/billing/addbilling"
-                    className="btn btn-primary btn-sm flex items-center gap-1"
+                    className="btn btn-primary btn-sm text-white flex items-center gap-1"
                   >
                     <Plus size={16} /> Add Billing
                   </Link>
-                  <button
-                    onClick={handleMigrate}
-                    className="btn btn-primary btn-sm flex items-center gap-1"
-                  >
-                    <Plus size={16} /> Migrate
-                  </button>
+                  
                 </div>
               </div>
 
