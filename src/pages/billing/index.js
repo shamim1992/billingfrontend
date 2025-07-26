@@ -342,7 +342,7 @@ const BillingTable = () => {
                   <span className="text-gray-600">Active filters:</span>
                   {searchQuery && (
                     <span className="badge badge-outline">
-                      Search: "{searchQuery}"
+                      Search: {searchQuery}
                     </span>
                   )}
                   {filterStatus !== 'all' && (
