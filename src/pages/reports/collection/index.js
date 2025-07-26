@@ -1018,7 +1018,7 @@ const CollectionReport = () => {
               <Calendar className="mx-auto h-16 w-16 text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">Select Date Range</h3>
               <p className="text-gray-500 mb-4">
-                Please select both "From Date" and "To Date" to view the collection report details.
+                Please select both From Date and To Date to view the collection report details.
               </p>
               <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
