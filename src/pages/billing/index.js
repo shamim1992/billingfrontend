@@ -41,7 +41,6 @@ const BillingTable = () => {
         return 'text-warning';
       case 'cancelled':
         return 'text-error';
-      // Legacy status support
       case 'pending':
         return 'text-error';
       default:
@@ -52,14 +51,13 @@ const BillingTable = () => {
   const getStatusDisplayText = (status) => {
     switch (status?.toLowerCase()) {
       case 'active':
-        return 'Due';
+        return 'paid';
       case 'paid':
         return 'Paid';
       case 'partial':
         return 'Partial';
       case 'cancelled':
         return 'Cancelled';
-      // Legacy status support
       case 'pending':
         return 'Pending';
       default:

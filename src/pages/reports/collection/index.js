@@ -951,7 +951,7 @@ const CollectionReport = () => {
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="text-red-500" size={20} />
                       <h2 className="text-lg font-semibold text-gray-800">
-                        Today's Refund Report {dayjs(dateFrom).format('DD-MM-YYYY')} to {dayjs(dateTo).format('DD-MM-YYYY')} for Both IP &OP
+                        Refund Report {dayjs(dateFrom).format('DD-MM-YYYY')} to {dayjs(dateTo).format('DD-MM-YYYY')} 
                       </h2>
                     </div>
                   </div>

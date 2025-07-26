@@ -457,7 +457,7 @@ const PatientForm = () => {
                                     icon={Phone}
                                     placeholder="Phone Number"
                                     value={formData.phoneNumber}
-                                    required
+                                    
                                 />
                                 
                                 <InputField onChange={handleChange}

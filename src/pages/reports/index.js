@@ -12,7 +12,8 @@ import {
   ArrowUp, ArrowDown, Activity, Calculator, Users, Calendar, ChevronDown, 
   BarChart2, PieChart as PieChartIcon, CreditCard, Wallet, BanknoteIcon, 
   Receipt, TestTube2Icon, Download, RefreshCw, TrendingUp, TrendingDown,
-  IndianRupee, Clock, CheckCircle, AlertCircle, Eye, FileText
+  IndianRupee, Clock, CheckCircle, AlertCircle, Eye, FileText,
+  DollarSign
 } from 'lucide-react';
 import dayjs from 'dayjs';
 
@@ -446,6 +447,12 @@ const BillingReport = () => {
                 className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all group">
                 <BarChart2 className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-medium text-purple-800">Dues Report</span>
+              </Link>
+
+              <Link href="/reports/refund" 
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all group">
+                <DollarSign className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-purple-800">Refund Report</span>
               </Link>
             </div>
           </div>

@@ -58,10 +58,10 @@ const Custom404 = () => {
               Oops! Page Not Found
             </h2>
             <p className="text-gray-600 text-lg mb-2">
-              The page you're looking for seems to have wandered off to another dimension.
+              The page you are looking for seems to have wandered off to another dimension.
             </p>
             <p className="text-gray-500">
-              Don't worry, it happens to the best of us. Let's get you back on track!
+              Do not worry, it happens to the best of us. Let us get you back on track!
             </p>
           </div>
 

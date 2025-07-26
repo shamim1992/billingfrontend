@@ -317,7 +317,7 @@ const UserCollection = () => {
     },
     {
       name: 'Created By',
-      selector: row => row.createdBy.name,
+      selector: row => row?.createdBy?.name,
       sortable: true,
     },
     {
