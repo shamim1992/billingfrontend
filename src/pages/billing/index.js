@@ -10,7 +10,7 @@ const BillingTable = () => {
   const { user } = useSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' for oldest first, 'desc' for newest first
+  const [sortOrder, setSortOrder] = useState('desc'); 
   
   // Date filtering states
   const [dateFrom, setDateFrom] = useState('');
