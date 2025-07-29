@@ -75,12 +75,12 @@ const PrintBillComponent = ({ bill }) => {
           {/* Bill Header with Status */}
           <div className="text-center mb-4 print-section">
             <h2 className="text-lg font-bold">MEDICAL BILL</h2>
-            <div className="flex justify-center items-center gap-4 mt-2">
+            {/* <div className="flex justify-center items-center gap-4 mt-2">
               <span className="text-sm">Status: <strong>{getStatusDisplayText(billStatus)}</strong></span>
               {dueAmount > 0 && (
                 <span className="text-sm text-red-600">Due: <strong>₹{dueAmount.toFixed(2)}</strong></span>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Bill Info */}

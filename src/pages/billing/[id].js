@@ -175,6 +175,30 @@ const BillingDetails = () => {
     }
   };
 
+  const getEffectiveStatus = (bill) => {
+    // If bill is cancelled, always show cancelled
+    if (bill.status?.toLowerCase() === 'cancelled' || bill.remarks?.toLowerCase() === 'cancelled') {
+      return 'cancelled';
+    }
+    
+    const grandTotal = bill.totals?.grandTotal || 0;
+    const paidAmount = bill.payment?.paid || 0;
+    const dueAmount = bill.totals?.dueAmount ?? bill.totals?.balance ?? 0;
+    
+    // Check if fully paid (due amount is 0 or paid amount equals grand total)
+    if (dueAmount <= 0 || Math.abs(paidAmount - grandTotal) < 0.01) {
+      return 'paid';
+    }
+    
+    // Check if partially paid
+    if (paidAmount > 0 && paidAmount < grandTotal) {
+      return 'partial';
+    }
+    
+    // Default to active (due) if no payment or backend status
+    return bill.status?.toLowerCase() || 'active';
+  };
+
   if (loading) return (
     <Layout>
       <div className="flex justify-center items-center h-96">
@@ -193,7 +217,7 @@ const BillingDetails = () => {
 
   if (!bill) return null;
 
-  const billStatus = bill.status || bill.remarks;
+  const billStatus = getEffectiveStatus(bill);
   const dueAmount = bill.totals?.dueAmount ?? bill.totals?.balance ?? 0;
 
   return (
