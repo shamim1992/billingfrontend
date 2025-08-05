@@ -57,10 +57,10 @@ const ForgotPassword = () => {
             
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Check Your Email</h2>
             <p className="text-gray-600 mb-6">
-              We've sent a password reset link to <strong>{email}</strong>
+              We have sent a password reset link to <strong>{email}</strong>
             </p>
             <p className="text-sm text-gray-500 mb-8">
-              Didn't receive the email? Check your spam folder or try again.
+              Did not receive the email? Check your spam folder or try again.
             </p>
             
             <div className="space-y-3">
@@ -101,7 +101,7 @@ const ForgotPassword = () => {
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Forgot Password</h2>
             <p className="text-gray-500 text-sm mt-1">
-              Enter your email address and we'll send you a link to reset your password
+              Enter your email address and we will send you a link to reset your password
             </p>
           </div>
 
