@@ -15,7 +15,9 @@ const ConsultationFeeReport = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
+
   const [filteredBills, setFilteredBills] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [summary, setSummary] = useState({
     cash: 0,
@@ -130,6 +132,7 @@ const ConsultationFeeReport = () => {
   };
 
   // PDF Export Function - Doctor-wise Summary Format
+// PDF Export Function - Doctor-wise Summary Format
   const handleSummaryExport = () => {
     // Group data by doctor and consultation type
     const doctorSummary = {};
@@ -159,6 +162,10 @@ const ConsultationFeeReport = () => {
         doctorSummary[doctorName][itemName].amount += grossFee;
       }
     });
+
+    // Get selected doctor name
+    const selectedDoctorName = selectedDoctor ? 
+      getUniqueDoctors().find(d => d._id === selectedDoctor)?.name : null;
 
     const printWindow = window.open('', '_blank');
     
@@ -207,6 +214,21 @@ const ConsultationFeeReport = () => {
               font-weight: bold; 
               margin-bottom: 5px; 
             }
+            .doctor-info {
+              font-size: 14px;
+              font-weight: bold;
+              color: #2563eb;
+              margin-top: 10px;
+              padding: 10px;
+              background-color: #f0f9ff;
+              border: 1px solid #2563eb;
+              border-radius: 4px;
+            }
+            .date-range {
+              font-size: 12px;
+              color: #666;
+              margin-top: 5px;
+            }
             table { 
               width: 100%; 
               border-collapse: collapse; 
@@ -253,10 +275,15 @@ const ConsultationFeeReport = () => {
           </div>
           
           <div class="header">
-            <div class="report-title">
-              Summary Report From ${dateFrom ? dayjs(dateFrom).format('DD-MM-YYYY') : 'Start'} to ${dateTo ? dayjs(dateTo).format('DD-MM-YYYY') : dayjs().format('DD-MM-YYYY')}
-              ${selectedDoctor ? ` for ${getUniqueDoctors().find(d => d._id === selectedDoctor)?.name || 'Selected Doctor'}` : ''}
+            <div class="report-title">Summary Report</div>
+            <div class="date-range">
+              From ${dateFrom ? dayjs(dateFrom).format('DD-MM-YYYY') : 'Start'} to ${dateTo ? dayjs(dateTo).format('DD-MM-YYYY') : dayjs().format('DD-MM-YYYY')}
             </div>
+            ${selectedDoctorName ? `
+              <div class="doctor-info">
+                Doctor: ${selectedDoctorName}
+              </div>
+            ` : ''}
           </div>
 
           <table>
@@ -347,6 +374,10 @@ const ConsultationFeeReport = () => {
 
   // PDF Export Function - Detailed Report
   const handleDetailedExport = () => {
+    // Get selected doctor name
+    const selectedDoctorName = selectedDoctor ? 
+      getUniqueDoctors().find(d => d._id === selectedDoctor)?.name : null;
+
     const printWindow = window.open('', '_blank');
     
     const htmlContent = `
@@ -382,6 +413,23 @@ const ConsultationFeeReport = () => {
               margin-bottom: 15px;
               color: #333;
             }
+            .doctor-info {
+              font-size: 14px;
+              font-weight: bold;
+              color: #2563eb;
+              margin-top: 10px;
+              padding: 10px;
+              background-color: #f0f9ff;
+              border: 1px solid #2563eb;
+              border-radius: 4px;
+              text-align: center;
+            }
+            .filter-info {
+              font-size: 12px;
+              color: #666;
+              margin-top: 5px;
+              text-align: center;
+            }
             table { 
               width: 100%; 
               border-collapse: collapse; 
@@ -411,12 +459,18 @@ const ConsultationFeeReport = () => {
               margin-bottom: 30px; 
               padding-bottom: 15px;
               border-bottom: 1px solid #ccc;
+              text-align: center;
             }
             .report-title { 
               font-size: 20px; 
               font-weight: bold; 
               margin-bottom: 5px; 
               color: #1a1a1a;
+            }
+            .report-date {
+              font-size: 12px;
+              color: #666;
+              margin-top: 5px;
             }
             @media print {
               .no-print { display: none; }
@@ -433,9 +487,16 @@ const ConsultationFeeReport = () => {
           <div class="header">
             <div class="report-title">Detailed Consultation Fee Report (with 10% TDS)</div>
             <div class="report-date">Generated on: ${dayjs().format('DD/MM/YYYY HH:mm')}</div>
+            
             ${dateFrom && dateTo ? `
               <div class="filter-info">
                 Period: ${dayjs(dateFrom).format('DD/MM/YYYY')} to ${dayjs(dateTo).format('DD/MM/YYYY')}
+              </div>
+            ` : ''}
+            
+            ${selectedDoctorName ? `
+              <div class="doctor-info">
+                Doctor: ${selectedDoctorName}
               </div>
             ` : ''}
           </div>
@@ -476,7 +537,7 @@ const ConsultationFeeReport = () => {
               <tr>
                 <th>Date</th>
                 <th>Bill No</th>
-                <th>Doctor</th>
+              
                 <th>Patient</th>
                 <th>Consultation Type</th>
                 <th>Gross Fee</th>
@@ -498,7 +559,7 @@ const ConsultationFeeReport = () => {
                   <tr>
                     <td>${dayjs(bill.date).format('DD/MM/YYYY')}</td>
                     <td>${bill.billNumber}</td>
-                    <td>${bill.doctorId?.name || ''}</td>
+                   
                     <td>${bill.patientId?.firstName} ${bill.patientId?.lastName}</td>
                     <td>${consultationItem?.name || 'N/A'}</td>
                     <td>${formatCurrency(grossFee)}</td>

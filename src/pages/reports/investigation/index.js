@@ -86,6 +86,9 @@ const DoctorCollection = () => {
     if (billings?.length) {
       let filtered = [...billings];
 
+      // First filter: Only bills with investigation amounts > 0
+      filtered = filtered.filter(bill => getInvestigationTotal(bill) > 0);
+
       // Date filter
       if (dateFrom && dateTo) {
         filtered = filtered.filter(bill => {
@@ -189,6 +192,7 @@ const DoctorCollection = () => {
                 Period: ${dayjs(dateFrom).format('DD/MM/YYYY')} to ${dayjs(dateTo).format('DD/MM/YYYY')}
               </div>
             ` : ''}
+            <div class="filter-note">Note: Only showing bills with investigation fees</div>
           </div>
 
           <div class="summary-card">
@@ -213,7 +217,7 @@ const DoctorCollection = () => {
             </table>
           </div>
 
-          <div class="summary-title">Billing Details</div>
+          <div class="summary-title">Billing Details (Investigation Bills Only)</div>
           <table>
             <thead>
               <tr>
@@ -353,12 +357,12 @@ const DoctorCollection = () => {
   }
   ];
 
-  // Get unique doctors who have bills
+  // Get unique doctors who have bills with investigations
   const getUniqueDoctors = () => {
     if (!billings?.length) return [];
     const uniqueDoctors = new Map();
     billings.forEach(billing => {
-      if (billing.doctorId?._id && billing.doctorId?.name) {
+      if (billing.doctorId?._id && billing.doctorId?.name && getInvestigationTotal(billing) > 0) {
         uniqueDoctors.set(billing.doctorId._id, billing.doctorId);
       }
     });
@@ -402,7 +406,7 @@ const DoctorCollection = () => {
           <div className="text-sm font-bold text-red-900">{formatCurrency(summary.pending)}</div>
         </div>
         <div className="bg-gray-100 p-4 rounded-lg">
-          <div className="text-xs font-semibold text-gray-700">Total Bills</div>
+          <div className="text-xs font-semibold text-gray-700">Investigation Bills</div>
           <div className="text-sm font-bold text-gray-900">{summary.billCount}</div>
         </div>
       </div>
@@ -413,7 +417,10 @@ const DoctorCollection = () => {
     <Layout>
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg font-bold">Investigation Collection Report</h1>
+          <div>
+            <h1 className="text-lg font-bold">Investigation Collection Report</h1>
+            <p className="text-sm text-gray-600">Showing only bills with investigation fees</p>
+          </div>
           <button 
             onClick={handleExport}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg hover:shadow-md border transition-colors bg-blue-500 text-white hover:bg-blue-600"
@@ -502,8 +509,8 @@ const DoctorCollection = () => {
               noDataComponent={
                 <div className="text-center py-4">
                   {(dateFrom && dateTo) || selectedDoctor || searchQuery
-                    ? "No bills found for the selected filters"
-                    : "Please apply filters to view bills"}
+                    ? "No investigation bills found for the selected filters"
+                    : "No bills with investigation fees found"}
                 </div>
               }
               paginationPerPage={10}
@@ -551,7 +558,7 @@ const DoctorCollection = () => {
                       <th className="px-4 py-2 border">UPI</th>
                       <th className="px-4 py-2 border">NEFT</th>
                       <th className="px-4 py-2 border">Pending</th>
-                      <th className="px-4 py-2 border">Total Bills</th>
+                      <th className="px-4 py-2 border">Investigation Bills</th>
                     </tr>
                   </thead>
                   <tbody>
