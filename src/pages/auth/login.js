@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/actions/authActions';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Mail, Lock, Loader } from 'lucide-react';
 
 const Login = () => {
@@ -103,6 +104,16 @@ const Login = () => {
                   required
                 />
               </div>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="flex justify-end">
+              <Link 
+                href="/auth/forgot-password" 
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition duration-150 ease-in-out"
+              >
+                Forgot your password?
+              </Link>
             </div>
 
             <button

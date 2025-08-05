@@ -1,23 +1,6 @@
-
 import { baseURL } from '@/ApiUrl';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-// export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
-//   try {
-//     console.log(credentials)
-//     const response = await axios.post(`${baseURL}/api/auth/login`, credentials);
-//     localStorage.setItem('token', response.data.token);   
-//     return response.data; 
-//   } 
-//   catch (error) 
-//   {
-//     localStorage.removeItem('token');
-//     return thunkAPI.rejectWithValue(error.response.data.message);
-//   }
-// });
-
-// authActions.js
 import axiosInstance from '../../utils/axiosSetup';
 
 export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
@@ -51,47 +34,47 @@ export const fetchProfile = createAsyncThunk('auth/profile', async (_, thunkAPI)
   }
 });
 
-
-// export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
-//   try {
-//     const response = await axios.post(`${baseURL}/api/auth/login`, credentials);
+export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (email, thunkAPI) => {
+  try {
+    if (!email) {
+      throw new Error('Email is required');
+    }
     
-//     // Log the response to verify the data structure
-//     console.log('Login response:', response.data);
+    const response = await axiosInstance.post('/api/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    console.error('Forgot password error:', error.response?.data || error.message);
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to send reset email');
+  }
+});
+
+export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ token, newPassword }, thunkAPI) => {
+  try {
+    if (!token || !newPassword) {
+      throw new Error('Token and new password are required');
+    }
     
-//     if (response.data.token) {
-//       // Store token in localStorage
-//       localStorage.setItem('token', response.data.token);
-//       // Store user data if needed
-//       localStorage.setItem('user', JSON.stringify(response.data.user));
-//     }
+    const response = await axiosInstance.post('/api/auth/reset-password', { 
+      token, 
+      newPassword 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Reset password error:', error.response?.data || error.message);
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to reset password');
+  }
+});
+
+export const verifyResetToken = createAsyncThunk('auth/verifyResetToken', async (token, thunkAPI) => {
+  try {
+    if (!token) {
+      throw new Error('Token is required');
+    }
     
-//     return response.data;
-//   } catch (error) {
-//     console.error('Login error:', error.response?.data);
-//     localStorage.removeItem('token'); // Clear any existing token
-//     localStorage.removeItem('user');  // Clear any existing user data
-//     return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
-//   }
-// });
-
-
-// export const fetchProfile = createAsyncThunk('auth/profile', async (_, thunkAPI) => {
-//   const token = localStorage.getItem('token');
-//   if (!token) {
-//     return thunkAPI.rejectWithValue('No token provided');
-//   }
-//   try {
-//     const response = await axios.get(`${baseURL}/api/auth/profile`, {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return response.data.user;
-//   } catch (error) {
-//     localStorage.removeItem('token');
-//     localStorage.removeItem('user');
-//     return thunkAPI.rejectWithValue(error.response.data.message);
-//   }
-// });
-
-
-
+    const response = await axiosInstance.get(`/api/auth/verify-reset-token/${token}`);
+    return response.data;
+  } catch (error) {
+    console.error('Verify token error:', error.response?.data || error.message);
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Invalid or expired token');
+  }
+});
