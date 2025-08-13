@@ -454,6 +454,16 @@ const BillingReport = () => {
                 <DollarSign className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-medium text-purple-800">Refund Report</span>
               </Link>
+              <Link href="/reports/discount/discount-report" 
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all group">
+                <DollarSign className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-purple-800">Discount Report</span>
+              </Link>
+              <Link href="/reports/service/service-charges" 
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all group">
+                <DollarSign className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-purple-800">Service Charge Report</span>
+              </Link>
             </div>
           </div>
 
